@@ -35,15 +35,14 @@ jobs:
         working-directory: ./src
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          #curl -L -o Win10LTSC2021amd64Original.iso
+          #curl -L -o win10.iso
           
-          curl -L -o zh-Win10LTSC2021amd64.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
-          curl -L -o zh-Win10LTSC2021amd64.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
-          curl -L -o zh-Win10LTSC2021amd64.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
-
-          7z x Win10LTSC2021amd64.7z.001 -y
-          #4810M
-          Rename-Item -Path "*.iso" -NewName "Win10LTSC2021amd64Original.iso"
+          curl -L -o win10src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
+          curl -L -o win10src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
+          curl -L -o win10src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
+          7z x win10src.7z.001 -y
+          Start-Sleep -Seconds 6
+          Rename-Item -Path "*.iso" -NewName "win10.iso"
           Remove-Item -Path "*.7z.*" -Force
           ls
           pwd
@@ -54,7 +53,7 @@ jobs:
         run: |
           copy ".\set\W10UI.ini" ".\Win_ISO_Patching_Scripts\" /Y
           copy ".\set\W10UI.cmd" ".\Win_ISO_Patching_Scripts\" /Y
-          move ".\src\Win10LTSC2021amd64Original.iso" ".\Win_ISO_Patching_Scripts\" /Y
+          move ".\src\win10.iso" ".\Win_ISO_Patching_Scripts\" /Y
           cd && dir /s
           
           .\Win_ISO_Patching_Scripts\Start.cmd
@@ -65,7 +64,7 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path ".\Win_ISO_Patching_Scripts\Win10LTSC2021amd64Original.iso" -Force
+          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10.iso" -Force
           
           $file = Get-ChildItem -Path .\Win_ISO_Patching_Scripts -Filter "*.iso" -File | Select-Object -First 1
           $fileNameOnly =$file.Name
