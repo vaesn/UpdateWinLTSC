@@ -56,7 +56,8 @@ jobs:
           Write-Host "OUT_REVISION: $version"
           Write-Host "REVISION_NAME: $revisionName".
           $outputZipFileName = "${revisionName}-${version}.7z"
-          7z a -t7z -v1700M -mx=0 ".\$outputZipFileName" ".\Win_ISO_Patching_Scripts\*.iso"
+          #-v1700M
+          7z a -t7z -v1260M -mx=0 ".\$outputZipFileName" ".\Win_ISO_Patching_Scripts\*.iso"
           Write-Host "Generated archive: .\$outputZipFileName"
           Write-Host "Split Archive Done..."
       - name: Step-6 Delete Old Release
