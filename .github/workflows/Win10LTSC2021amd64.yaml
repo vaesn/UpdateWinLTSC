@@ -1,40 +1,13 @@
 name: Win10_LTSC2021_amd64
-on:
-  workflow_dispatch:
-    inputs:
-      iso_url:
-        description: '原始ISO链接(在ntriver.org/download-windows-ltsc获取)'
-        required: true
-        type: string
-        default: ''
-      revision:
-        description: '修订版本号 (例如: 19044.7725)，由changewindows.org/platforms/pc获取'
-        required: true
-        type: string
-        default: ''
+on: workflow_dispatch
 permissions:
   contents: write
-env:
-  REVISION: ${{ inputs.revision }}
-  REVISION_NAME: Win10_LTSC2021_amd64
 jobs:
   Win10_LTSC2021_amd64:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
-      - name: Validate Inputs
-        shell: pwsh
-        run: |
-          if ([string]::IsNullOrWhiteSpace("${{ inputs.iso_url }}")) {
-            Write-Error "错误：ISO 下载链接不能为空！"
-            exit 1
-          }
-          if ([string]::IsNullOrWhiteSpace("${{ inputs.revision }}")) {
-            Write-Error "错误：修订版本号不能为空！"
-            exit 1
-          }
-          Write-Host "参数校验通过。"
       - name: Step-1 Initialize Workspace
         shell: pwsh
         working-directory: .
@@ -53,20 +26,16 @@ jobs:
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          curl -L -o win10.iso "${{ inputs.iso_url }}"
-          #curl -L -o win10src.7z.001
-          #7z x win10src.7z.001 -y
+          #curl -L -o win10.iso "${{ inputs.iso_url }}"
+          curl -L -o win10src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
+          curl -L -o win10src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
+          curl -L -o win10src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
+          7z x win10src.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win10.iso"
-          #Remove-Item -Path "*.7z.*" -Force
-          Remove-Item -Path "W10UI.ini" -Force
-          Remove-Item -Path "W10UI.cmd" -Force
-          ls
-          pwd
+          Rename-Item -Path "*.iso" -NewName "win10src.iso"
+          Remove-Item -Path "*.7z.*" -Force
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
-          ls
-          pwd
 
       - name: Step-4 Update By Win_ISO_Patching_Scripts
         shell: pwsh
@@ -78,17 +47,21 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10.iso" -Force
-          
+          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10src.iso" -Force
           $file = Get-ChildItem -Path .\Win_ISO_Patching_Scripts -Filter "*.iso" -File | Select-Object -First 1
-          $fileNameOnly =$file.Name
-          $fullPath =$file.FullName
-          Add-Content -Path $env:GITHUB_ENV -Value "FINAL_ARTIFACT_NAME=$fileNameOnly"
-          Add-Content -Path $env:GITHUB_ENV -Value "FINAL_ARTIFACT_PATH=$fullPath"
-          Write-Host "捕获到的文件名: $fileNameOnly"
-          Write-Host "完整路径: $fullPath"
+          $fileNameOnly = $file.Name
+          $fullPath = $file.FullName
+          $version = $fileNameOnly.Split('-')[0]
+          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_NAME=$fileNameOnly"
+          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_PATH=$fullPath"
+          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_REVISION=$version"
+          Add-Content -Path $env:GITHUB_ENV -Value "REVISION_NAME=WIN10LTSC2021amd64"
+          Write-Host "完整文件名: ${{ env.ARTIFACT_NAME }}"
+          Write-Host "完整路径: ${{ env.ARTIFACT_PATH }}"
+          Write-Host "VERSION: ${{ env.ARTIFACT_REVISION }}"
+          Write-Host "REVISION_NAME: ${{ env.REVISION_NAME }}"
           
-          7z a -t7z -v1700M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
+          7z a -t7z -v1700M -mx=0 .\${{ env.REVISION_NAME }}-${{ env.ARTIFACT_REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
 
       - name: Step-6 Delete Old Release
@@ -103,10 +76,9 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## ${{ env.REVISION_NAME }}_Update_${{ env.REVISION }}
-            - **Update**:  ${{ env.FINAL_ARTIFACT_NAME }}
-            
-            - **Original Image**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
+            ## ${{ env.REVISION_NAME }}-Update-${{ env.ARTIFACT_REVISION }}
+            - **ARTIFACT**:  ${{ env.ARTIFACT_NAME }}
+            - **ORIGINAL**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
             ---
             ### 📦 下载说明
             使用 7-Zip 进行分卷压缩（每卷 1650M）。
@@ -116,6 +88,5 @@ jobs:
             3. 使用 7-Zip 解压 `.7z.001` 即可获得完整的 ISO 文件。
             ---
           tag_name: ${{ env.REVISION_NAME }}
-          name: ${{ env.REVISION_NAME }}_${{ env.REVISION }}
-          files: |
-            ${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z.*
+          name: ${{ env.REVISION_NAME }}-${{ env.ARTIFACT_REVISION }}
+          files: *.7z.*
