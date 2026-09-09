@@ -89,7 +89,7 @@ jobs:
           Write-Host "捕获到的文件名: $fileNameOnly"
           Write-Host "完整路径: $fullPath"
           
-          7z a -t7z -v1850M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
+          7z a -t7z -v1536M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
 
       - name: Step-6 Delete Old Release
