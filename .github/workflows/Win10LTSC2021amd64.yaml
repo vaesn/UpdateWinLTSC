@@ -37,8 +37,11 @@ jobs:
           curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/h1yn52aj10ft?v=JB5nUgqhO52TzYtXJzBf_Y-qhkVK8OLD0RsktyIBL5QyVJWPcn2CiSt2jK6KerFCxv8T7mWm6A7hFCrFxAH0GFaMdAO13DnMADX-8hurliHJZamS0vR9eyUchhNp6I3srg-5J1jqtrVwChIz8JVmlBrv40OX1UUvF910dkwXtlMK43eAjVO4VH9v6vJgNndGm2lLO4p9J2ltO6H-c9d9lestSeB5VtGXdb9ej7ncllEAIXaYk2qYfQprOpPr8F6am0GXJF4TtDqc
 
           #7z x Win10LTSC2021amd64.7z.001 -y
-          Rename-Item -Path "*.iso" -NewName "Windows10LTSC2021amd64Original.iso"
+          #4810M
+          #Rename-Item -Path "*.iso" -NewName "Windows10LTSC2021amd64Original.iso"
           #Remove-Item -Path "*.7z.*" -Force
+          ls
+          pwd
           
       - name: Step-4 Update By Win_ISO_Patching_Scripts
         shell: cmd
