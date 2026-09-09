@@ -31,12 +31,11 @@ jobs:
         shell: pwsh
         working-directory: ./src
         run: |
-          #curl -L -o Win10LTSC2021amd64.7z.001 https://github.com/vaesn/UUPdump2ISO/releases/download/win7src/autounattend.xml
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/k2laem70enbn?v=hMsuKv86g2h-wOIyhqOSi6iHvPijktVnK-JUDN5LEZOI-n2qfsEFxe8o01mlJq6Saq3LWSfnGVNm9IB_iKZAU5voLD8IZx6hbwHr1bTrDPp2ICeYlxBK9mWTwRSgNKBONmbWIA-zDv7M9nke7qOM7J-Akt9kSDrOgtQYnV7rSmcGB6kQQE-kezGaRuD0rOgBwUhvq-snsuc4vzKNeb8ojfIVe0VYb5ZGWhnjcsA57IDBglCYm3hV4ezmYcuoUFzC2TkqYrswZweL
+          curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/h1yn52aj10ft?v=rjtYKf8A_SHutaTdAssjAQ--wNwzW1m5j5b7vIa881ObfD4hbmXJ_aSBkxEDyOB3ZIDjM8VBSTFbvLud9fi0_QS94eqrUYEVX__7N67Ul03ZxTQrTs_QM0Cg9AItDx7SUkgU1380KQvP0pENJVtESDQ2-aviJdt7-Fl9M6pPstJzh2SiJizXCFvbRdIEZtVJpgjS8xalOaxkYysoVg33MbrZo0KGdXo8XYzRn1rC6MxIvTOUBN3yZI1LI13oq3udsmHCiAP2N2Yy
 
           #7z x Win10LTSC2021amd64.7z.001 -y
-          #Rename-Item -Path "*.iso" -NewName "Windows10LTSC2021amd64Original.iso"
+          Rename-Item -Path "*.iso" -NewName "Windows10LTSC2021amd64Original.iso"
           #Remove-Item -Path "*.7z.*" -Force
           
       - name: Step-4 Update By Win_ISO_Patching_Scripts
