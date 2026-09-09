@@ -91,5 +91,5 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}
           files: |
-            *.7z*
+            *.7z.*
           
