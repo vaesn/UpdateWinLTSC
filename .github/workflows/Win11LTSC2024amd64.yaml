@@ -25,11 +25,8 @@ jobs:
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          curl -L -o win11src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows11ISO/zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.7z.001
-          curl -L -o win11src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows11ISO/zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.7z.002
-          curl -L -o win11src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows11ISO/zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.7z.003
-          7z x win11src.7z.001 -y
+          gh release download Windows11ISO --repo yuanpeirong/UpdateWinISO --pattern "*cff9cd2d.7z.*" --dir ./
+          7z x *.7z.001 -y
           #5042M
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win11src.iso"

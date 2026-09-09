@@ -25,12 +25,8 @@ jobs:
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          #curl -L -o win10.iso "${{ inputs.iso_url }}"
-          curl -L -o win10src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
-          curl -L -o win10src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
-          curl -L -o win10src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
-          7z x win10src.7z.001 -y
+          gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*033b7312.7z.*" --dir ./
+          7z x *.7z.001 -y
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10src.iso"
           Remove-Item -Path "*.7z.*" -Force
