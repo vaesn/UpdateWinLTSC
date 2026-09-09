@@ -77,7 +77,7 @@ jobs:
           overwrite_files: true
           body:  
             ## ${{ env.REVISION_NAME }}-Update-${{ env.OUT_REVISION }}
-            - **ARTIFACT**:  ${{ env.OUT_NAME }}
+            - **ARTIFACT**: ${{ env.OUT_NAME }}
             - **ORIGINAL**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
             ---
             ### 📦 下载说明
@@ -89,5 +89,6 @@ jobs:
             ---
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}
-          files: *.7z.*
+          files: |
+            *.7z*
           
