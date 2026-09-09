@@ -1,5 +1,5 @@
 name: WIN10LTSC2021amd64
-'on': workflow_dispatch
+on: workflow_dispatch
 permissions:
   contents: write
 jobs:
@@ -38,9 +38,9 @@ jobs:
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
       - name: Step-4 Update By Win_ISO_Patching_Scripts
         shell: pwsh
-        working-directory: .
+        working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          .\Win_ISO_Patching_Scripts\Start.cmd
+          .\Start.cmd
       - name: Step-5 Split Archive
         shell: pwsh
         working-directory: .
@@ -50,16 +50,18 @@ jobs:
           $fileNameOnly = $file.Name
           $fullPath = $file.FullName
           $version = $fileNameOnly.Split('-')[0]
+          $revisionName = "WIN10LTSC2021amd64"
           Add-Content -Path $env:GITHUB_ENV -Value "OUT_NAME=$fileNameOnly"
           Add-Content -Path $env:GITHUB_ENV -Value "OUT_PATH=$fullPath"
           Add-Content -Path $env:GITHUB_ENV -Value "OUT_REVISION=$version"
-          Add-Content -Path $env:GITHUB_ENV -Value "REVISION_NAME=WIN10LTSC2021amd64"
-          Write-Host "完整文件名: ${{ env.OUT_NAME }}"
-          Write-Host "完整路径: ${{ env.OUT_PATH }}"
-          Write-Host "OUT_REVISION: ${{ env.OUT_REVISION }}"
-          Write-Host "REVISION_NAME: ${{ env.REVISION_NAME }}"
-
-          7z a -t7z -v1700M -mx=0 .\${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
+          Add-Content -Path $env:GITHUB_ENV -Value "REVISION_NAME=$revisionName"
+          Write-Host "完整文件名: $fileNameOnly"
+          Write-Host "完整路径: $fullPath"
+          Write-Host "OUT_REVISION: $version"
+          Write-Host "REVISION_NAME: $revisionName".
+          $outputZipFileName = "${revisionName}-${version}.7z"
+          7z a -t7z -v1700M -mx=0 ".\$outputZipFileName" ".\Win_ISO_Patching_Scripts\*.iso"
+          Write-Host "Generated archive: .\$outputZipFileName"
           Write-Host "Split Archive Done..."
       - name: Step-6 Delete Old Release
         env:
