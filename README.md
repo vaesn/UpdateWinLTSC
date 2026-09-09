@@ -9,7 +9,7 @@ Win_ISO_Patching_Scripts
 ChangeWindows
   https://changewindows.org/platforms/pc
 
-## Original Versions
+## Original Version
 - Windows 10 LTSC 2021 amd64
   - Original Image
     zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso

@@ -1,14 +1,12 @@
-name: Win10_LTSC2021_amd64
-
+name: Win11_LTSC2024_amd64
 on: workflow_dispatch
-
 permissions:
   contents: write
 env:
-  REVISION: '19044.7725'
-  REVISION_NAME: Win10_LTSC2021_amd64
+  REVISION: '26100.9445'
+  REVISION_NAME: Win11_LTSC2024_amd64
 jobs:
-  Win10_LTSC2021_amd64:
+  Win11_LTSC2024_amd64:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
@@ -31,16 +29,15 @@ jobs:
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          #curl -L -o win10.iso
-          curl -L -o win10src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
-          curl -L -o win10src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
-          curl -L -o win10src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
-          7z x win10src.7z.001 -y
+          curl -L -o win11.iso https://ts.buzzheavier.com/d/k2laem70enbn?v=MPLa205gO3MlNCZafq9BDI2j35pePWrVJHbQUB5NRTrkFXjAFLgWj372h202_1G8y2k7KPO2lsCcuhmqWi3hen2jNIeizxWEsKy-iu5a5pukPQL_wo8kSbuQegFDgSxSinnHCR-YBTF17jNokF7j7IHAVsdAd8KxC0_GsvttIfc0TRebAZNK2vWeE0QZOzmAKO2_cinryv1KInH75lu-ZYztzDnmpL8bkOPf2JoA96d2lwfM5Papnia7mI-xugIsMRbI1yychUQi
+
+          #7z x win10src.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win10.iso"
-          Remove-Item -Path "*.7z.*" -Force
+          Rename-Item -Path "*.iso" -NewName "win11.iso"
+          #Remove-Item -Path "*.7z.*" -Force
           Remove-Item -Path "W10UI.ini" -Force
           Remove-Item -Path "W10UI.cmd" -Force
+          ls
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
           ls
@@ -56,7 +53,7 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10.iso" -Force
+          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win11.iso" -Force
           
           $file = Get-ChildItem -Path .\Win_ISO_Patching_Scripts -Filter "*.iso" -File | Select-Object -First 1
           $fileNameOnly =$file.Name
@@ -66,7 +63,7 @@ jobs:
           Write-Host "捕获到的文件名: $fileNameOnly"
           Write-Host "完整路径: $fullPath"
           
-          7z a -t7z -v1650M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
+          7z a -t7z -v1850M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
 
       - name: Step-6 Delete Old Release
@@ -84,7 +81,7 @@ jobs:
             ## ${{ env.REVISION_NAME }}_Update_${{ env.REVISION }}
             - **Update**:  ${{ env.FINAL_ARTIFACT_NAME }}
             
-            - **Original Image**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
+            - **Original Image**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
             ---
             ### 📦 下载说明
             使用 7-Zip 进行分卷压缩（每卷 1650M）。
