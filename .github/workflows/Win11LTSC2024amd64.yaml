@@ -1,9 +1,21 @@
 name: Win11_LTSC2024_amd64
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      iso_url:
+        description: '原始ISO链接(在ntriver.org/download-windows-ltsc获取)'
+        required: true
+        type: string
+        default: ''
+      revision:
+        description: '修订版本号 (例如: 26100.9445)，由changewindows.org/platforms/pc获取'
+        required: true
+        type: string
+        default: ''
 permissions:
   contents: write
 env:
-  REVISION: '26100.9445'
+  REVISION: ${{ inputs.revision }}
   REVISION_NAME: Win11_LTSC2024_amd64
 jobs:
   Win11_LTSC2024_amd64:
@@ -11,6 +23,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
+      - name: Validate Inputs
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace("${{ inputs.iso_url }}")) {
+            Write-Error "错误：ISO 下载链接不能为空！"
+            exit 1
+          }
+          if ([string]::IsNullOrWhiteSpace("${{ inputs.revision }}")) {
+            Write-Error "错误：修订版本号不能为空！"
+            exit 1
+          }
+          Write-Host "参数校验通过。"
       - name: Step-1 Initialize Workspace
         shell: pwsh
         working-directory: .
@@ -29,15 +53,17 @@ jobs:
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          curl -L -o win11.iso https://ts.buzzheavier.com/d/k2laem70enbn?v=MPLa205gO3MlNCZafq9BDI2j35pePWrVJHbQUB5NRTrkFXjAFLgWj372h202_1G8y2k7KPO2lsCcuhmqWi3hen2jNIeizxWEsKy-iu5a5pukPQL_wo8kSbuQegFDgSxSinnHCR-YBTF17jNokF7j7IHAVsdAd8KxC0_GsvttIfc0TRebAZNK2vWeE0QZOzmAKO2_cinryv1KInH75lu-ZYztzDnmpL8bkOPf2JoA96d2lwfM5Papnia7mI-xugIsMRbI1yychUQi
-
-          #7z x win10src.7z.001 -y
+          curl -L -o win11.iso "${{ inputs.iso_url }}"
+          #curl -L -o win11src.7z.001
+          #7z x win11src.7z.001 -y
+          #5042M
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win11.iso"
           #Remove-Item -Path "*.7z.*" -Force
           Remove-Item -Path "W10UI.ini" -Force
           Remove-Item -Path "W10UI.cmd" -Force
           ls
+          pwd
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
           ls
