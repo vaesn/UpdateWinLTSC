@@ -41,25 +41,34 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10src.iso" -Force
-          $file = Get-ChildItem -Path .\Win_ISO_Patching_Scripts -Filter "*.iso" -File | Select-Object -First 1
-          $fileNameOnly = $file.Name
-          $fullPath = $file.FullName
-          $version = $fileNameOnly.Split('-')[0]
+          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10src.iso" -Force -ErrorAction SilentlyContinue
+          
+          $iso = Get-ChildItem -Path ".\Win_ISO_Patching_Scripts" -Filter "*.iso" -File | Select-Object -First 1
+          $hash = (Get-FileHash -Path $iso.FullName -Algorithm SHA256).Hash.ToLower()
+          $hash8 = $hash.Substring($hash.Length - 8)
+          $newName = "$($iso.BaseName)_$hash8.iso"
+          $newPath = Join-Path -Path $iso.DirectoryName -ChildPath $newName
+          Rename-Item -Path $iso.FullName -NewName $newName -Force
           $revisionName = "WIN10LTSC2021amd64"
-          Add-Content -Path $env:GITHUB_ENV -Value "OUT_NAME=$fileNameOnly"
-          Add-Content -Path $env:GITHUB_ENV -Value "OUT_PATH=$fullPath"
-          Add-Content -Path $env:GITHUB_ENV -Value "OUT_REVISION=$version"
-          Add-Content -Path $env:GITHUB_ENV -Value "REVISION_NAME=$revisionName"
-          Write-Host "完整文件名: $fileNameOnly"
-          Write-Host "完整路径: $fullPath"
-          Write-Host "OUT_REVISION: $version"
-          Write-Host "REVISION_NAME: $revisionName".
-          $outputZipFileName = "${revisionName}-${version}.7z"
-          #-v1700M
-          7z a -t7z -v1260M -mx=0 ".\$outputZipFileName" ".\Win_ISO_Patching_Scripts\*.iso"
+          $isoBaseName = $iso.BaseName
+          $revision = $isoBaseName.Split('-')[0]
+          
+          echo "ISO_NAME=$newName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "ISO_PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "ISO_REVISION=$revision" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "REVISION_NAME=$revisionName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          Write-Host "文件名: $newName"
+          Write-Host "文件路径: $newPath"
+          Write-Host "版本: $revision"
+          Write-Host "SHA256: $hash"
+          
+          $outputZipFileName = "${revisionName}-${revision}.7z"
+          7z a -t7z -v1260M -mx=0 ".\$outputZipFileName" "$newPath"
           Write-Host "Generated archive: .\$outputZipFileName"
           Write-Host "Split Archive Done..."
+          
       - name: Step-6 Delete Old Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,8 +80,9 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## ${{ env.REVISION_NAME }}-Update-${{ env.OUT_REVISION }}
-            - **ARTIFACT**: ${{ env.OUT_NAME }}
+            ## WIN10_LTSC_2021_amd64_Update_${{ env.ISO_REVISION }}
+            - **ARTIFACT**: ${{ env.ISO_NAME }}
+            - **SHA256**: ${{ env.SHA256 }}
             - **ORIGINAL**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
             ---
             ### 📦 下载说明
@@ -83,6 +93,6 @@ jobs:
             3. 使用 7-Zip 解压 `.7z.001` 即可获得完整的 ISO 文件。
             ---
           tag_name: ${{ env.REVISION_NAME }}
-          name: ${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}
+          name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
             *.7z.*
