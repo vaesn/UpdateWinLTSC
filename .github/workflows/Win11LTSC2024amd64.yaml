@@ -52,16 +52,16 @@ jobs:
           $fileNameOnly = $file.Name
           $fullPath = $file.FullName
           $version = $fileNameOnly.Split('-')[0]
-          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_NAME=$fileNameOnly"
-          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_PATH=$fullPath"
-          Add-Content -Path $env:GITHUB_ENV -Value "ARTIFACT_REVISION=$version"
+          Add-Content -Path $env:GITHUB_ENV -Value "OUT_NAME=$fileNameOnly"
+          Add-Content -Path $env:GITHUB_ENV -Value "OUT_PATH=$fullPath"
+          Add-Content -Path $env:GITHUB_ENV -Value "OUT_REVISION=$version"
           Add-Content -Path $env:GITHUB_ENV -Value "REVISION_NAME=WIN11LTSC2024amd64"
-          Write-Host "完整文件名: ${{ env.ARTIFACT_NAME }}"
-          Write-Host "完整路径: ${{ env.ARTIFACT_PATH }}"
-          Write-Host "ARTIFACT_REVISION: ${{ env.ARTIFACT_REVISION }}"
+          Write-Host "完整文件名: ${{ env.OUT_NAME }}"
+          Write-Host "完整路径: ${{ env.OUT_PATH }}"
+          Write-Host "OUT_REVISION: ${{ env.OUT_REVISION }}"
           Write-Host "REVISION_NAME: ${{ env.REVISION_NAME }}"
           
-          7z a -t7z -v1536M -mx=0 .\${{ env.REVISION_NAME }}-${{ env.ARTIFACT_REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
+          7z a -t7z -v1536M -mx=0 .\${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
 
       - name: Step-6 Delete Old Release
@@ -76,8 +76,8 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body:  
-            ## ${{ env.REVISION_NAME }}-Update-${{ env.ARTIFACT_REVISION }}
-            - **ARTIFACT**:  ${{ env.ARTIFACT_NAME }}
+            ## ${{ env.REVISION_NAME }}-Update-${{ env.OUT_REVISION }}
+            - **ARTIFACT**:  ${{ env.OUT_NAME }}
             - **ORIGINAL**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
             ---
             ### 📦 下载说明
@@ -88,6 +88,6 @@ jobs:
             3. 使用 7-Zip 解压 `.7z.001` 即可获得完整的 ISO 文件。
             ---
           tag_name: ${{ env.REVISION_NAME }}
-          name: ${{ env.REVISION_NAME }}-${{ env.ARTIFACT_REVISION }}
+          name: ${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}
           files: *.7z.*
           
