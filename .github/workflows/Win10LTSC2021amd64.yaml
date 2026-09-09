@@ -1,9 +1,9 @@
-name: Win10LTSC2021amd64
+name: WIN10LTSC2021amd64
 'on': workflow_dispatch
 permissions:
   contents: write
 jobs:
-  Win10LTSC2021amd64:
+  WIN10LTSC2021amd64:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
