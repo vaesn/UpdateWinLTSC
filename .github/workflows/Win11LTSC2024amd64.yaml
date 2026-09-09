@@ -25,7 +25,7 @@ jobs:
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          gh release download Windows11ISO --repo yuanpeirong/UpdateWinISO --pattern "*cff9cd2d.7z.*" --dir ./
+          gh release download Windows_11_LTSC_2024_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*cff9cd2d.7z.*" --dir ./
           7z x *.7z.001 -y
           #5042M
           Start-Sleep -Seconds 3
