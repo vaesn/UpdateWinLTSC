@@ -13,53 +13,43 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
-        
       - name: Step-1 Initialize Workspace
         shell: pwsh
         working-directory: .
         run: |
           mkdir -Force src
           mkdir -Force dist
-
       - name: Step-2 Checkout Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: .
         run: |
           git clone https://github.com/adavak/Win_ISO_Patching_Scripts.git
-          ls
-          pwd
       - name: Step-3 Download from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
-        working-directory: ./src
+        working-directory: ./Win_ISO_Patching_Scripts
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
           #curl -L -o win10.iso
-          
           curl -L -o win10src.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
           curl -L -o win10src.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
           curl -L -o win10src.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
           7z x win10src.7z.001 -y
-          Start-Sleep -Seconds 6
+          Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10.iso"
           Remove-Item -Path "*.7z.*" -Force
+          Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
+          Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
           ls
           pwd
           
       - name: Step-4 Update By Win_ISO_Patching_Scripts
-        shell: cmd
+        shell: pwsh
         working-directory: .
         run: |
-          copy ".\set\W10UI.ini" ".\Win_ISO_Patching_Scripts\" /Y
-          copy ".\set\W10UI.cmd" ".\Win_ISO_Patching_Scripts\" /Y
-          move ".\src\win10.iso" ".\Win_ISO_Patching_Scripts\" /Y
-          cd && dir /s
-          
           .\Win_ISO_Patching_Scripts\Start.cmd
           
-          cd && dir /s
-        
       - name: Step-5 Split Archive
         shell: pwsh
         working-directory: .
