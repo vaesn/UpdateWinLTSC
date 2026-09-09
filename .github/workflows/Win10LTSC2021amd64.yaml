@@ -1,4 +1,4 @@
-name: Windows10_LTSC2021_amd64
+name: Win10_LTSC2021_amd64
 
 on: workflow_dispatch
 
@@ -6,9 +6,9 @@ permissions:
   contents: write
 env:
   REVISION: '19044.7725'
-  REVISION_NAME: Windows10_LTSC2021_amd64
+  REVISION_NAME: Win10_LTSC2021_amd64
 jobs:
-  Windows10_LTSC2021_amd64:
+  Win10_LTSC2021_amd64:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
@@ -35,16 +35,16 @@ jobs:
         working-directory: ./src
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          #curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/h1yn52aj10ft?v=JB5nUgqhO52TzYtXJzBf_Y-qhkVK8OLD0RsktyIBL5QyVJWPcn2CiSt2jK6KerFCxv8T7mWm6A7hFCrFxAH0GFaMdAO13DnMADX-8hurliHJZamS0vR9eyUchhNp6I3srg-5J1jqtrVwChIz8JVmlBrv40OX1UUvF910dkwXtlMK43eAjVO4VH9v6vJgNndGm2lLO4p9J2ltO6H-c9d9lestSeB5VtGXdb9ej7ncllEAIXaYk2qYfQprOpPr8F6am0GXJF4TtDqc
+          #curl -L -o Win10LTSC2021amd64Original.iso
+          
           curl -L -o zh-Win10LTSC2021amd64.7z.001 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.001
           curl -L -o zh-Win10LTSC2021amd64.7z.002 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.002
           curl -L -o zh-Win10LTSC2021amd64.7z.003 https://github.com/yuanpeirong/UpdateWinISO/releases/download/Windows10ISO/zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.7z.003
 
           7z x Win10LTSC2021amd64.7z.001 -y
           #4810M
-          #Rename-Item -Path "*.iso" -NewName "
-.iso"
-          #Remove-Item -Path "*.7z.*" -Force
+          Rename-Item -Path "*.iso" -NewName "Win10LTSC2021amd64Original.iso"
+          Remove-Item -Path "*.7z.*" -Force
           ls
           pwd
           
@@ -54,14 +54,19 @@ jobs:
         run: |
           copy ".\set\W10UI.ini" ".\Win_ISO_Patching_Scripts\" /Y
           copy ".\set\W10UI.cmd" ".\Win_ISO_Patching_Scripts\" /Y
-          move ".\src\Windows10LTSC2021amd64Original.iso" ".\Win_ISO_Patching_Scripts\" /Y
+          move ".\src\Win10LTSC2021amd64Original.iso" ".\Win_ISO_Patching_Scripts\" /Y
           cd && dir /s
+          
           .\Win_ISO_Patching_Scripts\Start.cmd
+          
+          cd && dir /s
         
       - name: Step-5 Split Archive
         shell: pwsh
         working-directory: .
         run: |
+          Remove-Item -Path ".\Win_ISO_Patching_Scripts\Win10LTSC2021amd64Original.iso" -Force
+          
           $file = Get-ChildItem -Path .\Win_ISO_Patching_Scripts -Filter "*.iso" -File | Select-Object -First 1
           $fileNameOnly =$file.Name
           $fullPath =$file.FullName
@@ -69,10 +74,10 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "FINAL_ARTIFACT_PATH=$fullPath"
           Write-Host "捕获到的文件名: $fileNameOnly"
           Write-Host "完整路径: $fullPath"
+          
           7z a -t7z -v1650M -mx=0 .\${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
-          Remove-Item -Path "*.iso" -Force
-      
+
       - name: Step-6 Delete Old Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,4 +105,4 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}_${{ env.REVISION }}
           files: |
-            ${{ env.ISO_LABEL }}.7z.*
+            ${{ env.REVISION_NAME }}_${{ env.REVISION }}.7z.*
