@@ -1,5 +1,5 @@
 name: Win10_LTSC2021_amd64
-on: workflow_dispatch
+'on': workflow_dispatch
 permissions:
   contents: write
 jobs:
@@ -36,13 +36,11 @@ jobs:
           Remove-Item -Path "*.7z.*" -Force
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
-
       - name: Step-4 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: .
         run: |
           .\Win_ISO_Patching_Scripts\Start.cmd
-          
       - name: Step-5 Split Archive
         shell: pwsh
         working-directory: .
@@ -60,16 +58,14 @@ jobs:
           Write-Host "完整路径: ${{ env.OUT_PATH }}"
           Write-Host "OUT_REVISION: ${{ env.OUT_REVISION }}"
           Write-Host "REVISION_NAME: ${{ env.REVISION_NAME }}"
-          
+
           7z a -t7z -v1700M -mx=0 .\${{ env.REVISION_NAME }}-${{ env.OUT_REVISION }}.7z .\Win_ISO_Patching_Scripts\*.iso
           Write-Host "Split Archive Done..."
-
       - name: Step-6 Delete Old Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
-        
       - name: Step-7 Build New Release
         uses: softprops/action-gh-release@v3
         with:
