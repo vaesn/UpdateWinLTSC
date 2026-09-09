@@ -1,5 +1,7 @@
 name: Windows10_LTSC2021_amd64
+
 on: workflow_dispatch
+
 permissions:
   contents: write
 env:
@@ -32,7 +34,7 @@ jobs:
         working-directory: ./src
         run: |
           #gh release download v1.0.0 --repo ${{ github.repository }} --pattern "*.7z.*" --dir ./
-          curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/h1yn52aj10ft?v=rjtYKf8A_SHutaTdAssjAQ--wNwzW1m5j5b7vIa881ObfD4hbmXJ_aSBkxEDyOB3ZIDjM8VBSTFbvLud9fi0_QS94eqrUYEVX__7N67Ul03ZxTQrTs_QM0Cg9AItDx7SUkgU1380KQvP0pENJVtESDQ2-aviJdt7-Fl9M6pPstJzh2SiJizXCFvbRdIEZtVJpgjS8xalOaxkYysoVg33MbrZo0KGdXo8XYzRn1rC6MxIvTOUBN3yZI1LI13oq3udsmHCiAP2N2Yy
+          curl -L -o Windows10LTSC2021amd64Original.iso https://ts.buzzheavier.com/d/h1yn52aj10ft?v=JB5nUgqhO52TzYtXJzBf_Y-qhkVK8OLD0RsktyIBL5QyVJWPcn2CiSt2jK6KerFCxv8T7mWm6A7hFCrFxAH0GFaMdAO13DnMADX-8hurliHJZamS0vR9eyUchhNp6I3srg-5J1jqtrVwChIz8JVmlBrv40OX1UUvF910dkwXtlMK43eAjVO4VH9v6vJgNndGm2lLO4p9J2ltO6H-c9d9lestSeB5VtGXdb9ej7ncllEAIXaYk2qYfQprOpPr8F6am0GXJF4TtDqc
 
           #7z x Win10LTSC2021amd64.7z.001 -y
           Rename-Item -Path "*.iso" -NewName "Windows10LTSC2021amd64Original.iso"
