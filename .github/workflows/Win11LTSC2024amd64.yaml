@@ -26,7 +26,6 @@ jobs:
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
           gh release download Windows_11_LTSC_2024_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*cff9cd2d.zip.*" --dir ./
-          
           7z x *.zip.001 -y
           #5042M
           Start-Sleep -Seconds 3
