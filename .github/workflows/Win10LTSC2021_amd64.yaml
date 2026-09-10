@@ -1,9 +1,12 @@
-name: WIN10LTSC2021amd64
-'on': workflow_dispatch
+name: WIN10_LTSC_2021_amd64
+on:
+  workflow_dispatch
+  schedule:
+    - cron: '0 17 14 * *'
 permissions:
   contents: write
 jobs:
-  WIN10LTSC2021amd64:
+  WIN10_LTSC_2021_amd64:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
@@ -49,7 +52,7 @@ jobs:
           $newName = "$($iso.BaseName)_$hash8.iso"
           $newPath = Join-Path -Path $iso.DirectoryName -ChildPath $newName
           Rename-Item -Path $iso.FullName -NewName $newName -Force
-          $revisionName = "WIN10LTSC2021amd64"
+          $revisionName = "WIN10_LTSC_2021_amd64"
           $isoBaseName = $iso.BaseName
           $revision = $isoBaseName.Split('-')[0]
           
@@ -80,7 +83,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## WIN10_LTSC_2021_amd64_Update_${{ env.ISO_REVISION }}
+            ## Windows10_LTSC_2021_amd64_Update_${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **ORIGINAL**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
@@ -91,6 +94,7 @@ jobs:
             1. 下载所有 `.7z.001`, `.7z.002`, ... 等后缀的文件。
             2. 确保所有文件位于同一文件夹。
             3. 使用 7-Zip 解压 `.7z.001` 即可获得完整的 ISO 文件。
+            4. 使用 `https://gh-proxy.com/` 加速下载
             ---
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
