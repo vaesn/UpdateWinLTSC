@@ -25,11 +25,11 @@ jobs:
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*033b7312.7z.*" --dir ./
-          7z x *.7z.001 -y
+          gh release download Windows_10_LTSC_2021_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*033b7312.zip.*" --dir ./
+          7z x *.zip.001 -y
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10src.iso"
-          Remove-Item -Path "*.7z.*" -Force
+          Remove-Item -Path "*.zip.*" -Force
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
       - name: Step-4 Update By Win_ISO_Patching_Scripts
