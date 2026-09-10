@@ -86,7 +86,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## Windows11_LTSC_2024_amd64_Update_${{ env.ISO_REVISION }}
+            ## Windows11_LTSC_2024_amd64_Update-${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **ORIGINAL**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso

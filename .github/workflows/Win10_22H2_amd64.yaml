@@ -2,7 +2,7 @@ name: WIN10_22H2_amd64
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 14 * *'
+    - cron: '0 19 14 * *'
 permissions:
   contents: write
 jobs:
@@ -83,7 +83,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## WIN10_22H2_amd64_Update_${{ env.ISO_REVISION }}
+            ## WIN10_22H2_amd64_Update-${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **ORIGINAL**: zh-cn_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso
