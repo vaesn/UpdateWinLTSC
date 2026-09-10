@@ -1,6 +1,6 @@
 name: WIN11_LTSC_2024_amd64
 on:
-  workflow_dispatch
+  workflow_dispatch:
   schedule:
     - cron: '0 16 14 * *'
     

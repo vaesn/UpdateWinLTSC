@@ -1,6 +1,6 @@
 name: WIN10_LTSC_2021_amd64
 on:
-  workflow_dispatch
+  workflow_dispatch:
   schedule:
     - cron: '0 17 14 * *'
 permissions:
