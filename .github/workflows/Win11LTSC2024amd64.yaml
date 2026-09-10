@@ -31,7 +31,7 @@ jobs:
           #5042M
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win11src.iso"
-          Remove-Item -Path "*.7z.*" -Force
+          Remove-Item -Path "*.zip.*" -Force
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
       - name: Step-4 Update By Win_ISO_Patching_Scripts
