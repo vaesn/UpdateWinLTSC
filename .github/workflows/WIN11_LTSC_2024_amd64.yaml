@@ -42,7 +42,7 @@ jobs:
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          Start.cmd
+          .\Start.cmd
           
       - name: Step-4 Split Archive
         shell: pwsh
