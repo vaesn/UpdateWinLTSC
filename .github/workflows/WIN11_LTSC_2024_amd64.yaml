@@ -78,7 +78,9 @@ jobs:
           Write-Host "SHA256: $hash"
           
           $outputZipFileName = "${revisionName}-${revision}.7z"
+          
           7z a -t7z -v1536M -mx=0 ".\dist_win11\$outputZipFileName" "$newPath"
+          
           Write-Host "Generated archive: .\$outputZipFileName"
           Write-Host "Split Archive Done..."
 
