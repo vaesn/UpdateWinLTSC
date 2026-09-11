@@ -5,6 +5,7 @@ on:
     - cron: '0 19 14 * *'
 permissions:
   contents: write
+  actions: write
 jobs:
   WIN10_22H2_amd64:
     runs-on: windows-latest
@@ -100,7 +101,7 @@ jobs:
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run list \
             --workflow "${{ github.workflow }}" \
@@ -136,4 +137,4 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
-            .\dist_win10\${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
+            ./dist_win10\${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
