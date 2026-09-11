@@ -6,9 +6,14 @@ on:
 permissions:
   contents: write
   actions: write
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   WIN10_LTSC_2021_amd64:
     runs-on: windows-latest
+    timeout-minutes: 300
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -30,20 +35,20 @@ jobs:
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10src.iso"
           Remove-Item -Path "*.zip.*" -Force
-          Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
-          Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
+          Move-Item -Path "../set/W10UI.ini" -Destination "./W10UI.ini" -Force
+          Move-Item -Path "../set/W10UI.cmd" -Destination "./W10UI.cmd" -Force
           
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
-          .\Start.cmd
+          Start.cmd
           
       - name: Step-4 Split Archive
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path ".\Win_ISO_Patching_Scripts\win10src.iso" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "./Win_ISO_Patching_Scripts/win10src.iso" -Force -ErrorAction SilentlyContinue
           $SourceDir = "Win_ISO_Patching_Scripts"
           $DistDir = "dist_win10"
           $RevisionName = "WIN10_LTSC_2021_amd64"
@@ -63,7 +68,7 @@ jobs:
           $EnvVars = @(
               "ISO_SIZEMB={0:N2} MB" -f $SizeInMB
               "ISO_SIZEGB={0:N2} GB" -f $SizeInGB
-              "7zSIZE=$VolumeSizeArg"
+              "VOLUME_SIZE=$VolumeSizeArg"
               "ISO_NAME=$NewFileName"
               "ISO_PATH=$NewFilePath"
               "ISO_REVISION=$Revision"
@@ -91,23 +96,28 @@ jobs:
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
       - name: Step-5 Delete Old Release
+        if: ${{ always() }}
+        continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
         
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           gh run list \
             --workflow "${{ github.workflow }}" \
             --json databaseId,status,conclusion \
+            --limit 50 \
             --jq '.[] | select(.status == "completed") | .databaseId' \
             | while read -r run_id; do
                 [ "$run_id" = "${{ github.run_id }}" ] && continue
-                gh run delete "$run_id"
+                gh run delete "$run_id" || true
               done
               
       - name: Step-7 Build New Release
@@ -120,11 +130,11 @@ jobs:
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
-            - **Volume Size**: ${{ env.7zSIZE }}
+            - **Volume Size**: ${{ env.VOLUME_SIZE }}
             - **ORIGINAL**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
             ---
             ### 📦 下载说明
-            使用 7-Zip 进行分卷压缩（每卷 ${{ env.7zSIZE }}）。
+            使用 7-Zip 进行分卷压缩（每卷 ${{ env.VOLUME_SIZE }}）。
             **下载方式**:
             1. 下载所有 `.7z.001`, `.7z.002`, ... 等后缀的文件。
             2. 确保所有文件位于同一文件夹。
@@ -135,4 +145,4 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
-            ./dist_win10\${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
+            ./dist_win10/${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
