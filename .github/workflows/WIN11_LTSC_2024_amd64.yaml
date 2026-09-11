@@ -1,12 +1,10 @@
 name: WIN11_LTSC_2024_amd64
 on:
-  workflow_dispatch:
+  workflow_dispatch: null
   schedule:
     - cron: '0 16 14 * *'
-    
 permissions:
   contents: write
-  actions: write
 jobs:
   WIN11_LTSC_2024_amd64:
     runs-on: windows-latest
@@ -48,7 +46,7 @@ jobs:
         working-directory: .
         run: |
           Remove-Item -Path ".\Win_ISO_Patching_Scripts\win11src.iso" -Force -ErrorAction SilentlyContinue
-          
+
           $iso = Get-ChildItem -Path ".\Win_ISO_Patching_Scripts" -Filter "*.iso" -File | Select-Object -First 1
           $hash = (Get-FileHash -Path $iso.FullName -Algorithm SHA256).Hash.ToLower()
           $hash8 = $hash.Substring($hash.Length - 8)
@@ -58,14 +56,14 @@ jobs:
           $revisionName = "WIN11_LTSC_2024_amd64"
           $isoBaseName = $iso.BaseName
           $revision = $isoBaseName.Split('-')[0]
-          
+
           $sizeInBytes =$iso.Length
           $sizeInMB =$sizeInBytes / 1MB
           $sizeInGB =$sizeInBytes / 1GB
-          
+
           echo "ISO_SIZEMB=$("{0:N2}" -f$sizeInMB) MB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "ISO_SIZEGB=$("{0:N2}" -f$sizeInGB) GB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          
+
           echo "ISO_NAME=$newName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "ISO_PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "ISO_REVISION=$revision" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -76,20 +74,32 @@ jobs:
           Write-Host "文件路径: $newPath"
           Write-Host "版本: $revision"
           Write-Host "SHA256: $hash"
-          
+
           $outputZipFileName = "${revisionName}-${revision}.7z"
-          
+
           7z a -t7z -v1536M -mx=0 ".\dist_win11\$outputZipFileName" "$newPath"
-          
+
           Write-Host "Generated archive: .\$outputZipFileName"
           Write-Host "Split Archive Done..."
-
       - name: Step-6 Delete Old Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
-      - name: Step-7 Build New Release
+      - name: Step-7 Delete past completed runs of this workflow
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list \
+            --workflow "${{ github.workflow }}" \
+            --json databaseId,status,conclusion \
+            --jq '.[] | select(.status == "completed") | .databaseId' \
+            | while read -r run_id; do
+                [ "$run_id" = "${{ github.run_id }}" ] && continue
+                gh run delete "$run_id"
+              done
+      - name: Step-8 Build New Release
         uses: softprops/action-gh-release@v3
         with:
           fail_on_unmatched_files: true
