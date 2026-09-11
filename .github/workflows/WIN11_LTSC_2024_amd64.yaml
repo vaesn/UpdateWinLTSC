@@ -11,18 +11,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
-      - name: Step-1 Initialize Workspace
-        shell: pwsh
-        working-directory: .
-        run: |
-          mkdir -Force src
-          mkdir -Force dist_win11
-      - name: Step-2 Checkout Win_ISO_Patching_Scripts
+
+      - name: Step-1 Checkout Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: .
         run: |
           git clone https://github.com/adavak/Win_ISO_Patching_Scripts.git
-      - name: Step-3 Download from Release
+          
+      - name: Step-2 Download from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
@@ -36,57 +32,71 @@ jobs:
           Remove-Item -Path "*.zip.*" -Force
           Move-Item -Path "..\set\W10UI.ini" -Destination ".\W10UI.ini" -Force
           Move-Item -Path "..\set\W10UI.cmd" -Destination ".\W10UI.cmd" -Force
-      - name: Step-4 Update By Win_ISO_Patching_Scripts
+          
+      - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: ./Win_ISO_Patching_Scripts
         run: |
           .\Start.cmd
-      - name: Step-5 Split Archive
+          
+      - name: Step-4 Split Archive
         shell: pwsh
         working-directory: .
         run: |
           Remove-Item -Path ".\Win_ISO_Patching_Scripts\win11src.iso" -Force -ErrorAction SilentlyContinue
-
-          $iso = Get-ChildItem -Path ".\Win_ISO_Patching_Scripts" -Filter "*.iso" -File | Select-Object -First 1
-          $hash = (Get-FileHash -Path $iso.FullName -Algorithm SHA256).Hash.ToLower()
-          $hash8 = $hash.Substring($hash.Length - 8)
-          $newName = "$($iso.BaseName)_$hash8.iso"
-          $newPath = Join-Path -Path $iso.DirectoryName -ChildPath $newName
-          Rename-Item -Path $iso.FullName -NewName $newName -Force
-          $revisionName = "WIN11_LTSC_2024_amd64"
-          $isoBaseName = $iso.BaseName
-          $revision = $isoBaseName.Split('-')[0]
-
-          $sizeInBytes =$iso.Length
-          $sizeInMB =$sizeInBytes / 1MB
-          $sizeInGB =$sizeInBytes / 1GB
-
-          echo "ISO_SIZEMB=$("{0:N2}" -f$sizeInMB) MB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "ISO_SIZEGB=$("{0:N2}" -f$sizeInGB) GB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-          echo "ISO_NAME=$newName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "ISO_PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "ISO_REVISION=$revision" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "REVISION_NAME=$revisionName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-          Write-Host "文件名: $newName"
-          Write-Host "文件路径: $newPath"
-          Write-Host "版本: $revision"
-          Write-Host "SHA256: $hash"
-
-          $outputZipFileName = "${revisionName}-${revision}.7z"
-
-          7z a -t7z -v1536M -mx=0 ".\dist_win11\$outputZipFileName" "$newPath"
-
-          Write-Host "Generated archive: .\$outputZipFileName"
-          Write-Host "Split Archive Done..."
-      - name: Step-6 Delete Old Release
+          $SourceDir = "Win_ISO_Patching_Scripts"
+          $DistDir = "dist_win11"
+          $RevisionName = "WIN11_LTSC_2024_amd64"
+          New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
+          $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
+          $FullHash = (Get-FileHash -Path $IsoFile.FullName -Algorithm SHA256).Hash.ToLower()
+          $ShortHash = $FullHash.Substring($FullHash.Length - 8)
+          $NewFileName = "$($IsoFile.BaseName)_$ShortHash.iso"
+          $NewFilePath = Join-Path -Path $IsoFile.DirectoryName -ChildPath $NewFileName
+          Rename-Item -Path $IsoFile.FullName -NewName $NewFileName -Force
+          $Revision = $IsoFile.BaseName.Split('-')[0]
+          $SizeInBytes = $IsoFile.Length
+          $SizeInMB = $SizeInBytes / 1MB
+          $SizeInGB = $SizeInBytes / 1GB
+          $VolumeSizeVal = [Math]::Ceiling($SizeInMB / 4) + 32
+          $VolumeSizeArg = "${VolumeSizeVal}M"
+          $EnvVars = @(
+              "ISO_SIZEMB={0:N2} MB" -f $SizeInMB
+              "ISO_SIZEGB={0:N2} GB" -f $SizeInGB
+              "7zSIZE=$VolumeSizeArg"
+              "ISO_NAME=$NewFileName"
+              "ISO_PATH=$NewFilePath"
+              "ISO_REVISION=$Revision"
+              "REVISION_NAME=$RevisionName"
+              "SHA256=$FullHash"
+          )
+          $EnvVars | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "  ISO Processing Information" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          @(
+              "文件名: $NewFileName"
+              "大小 : {0:N2} MB" -f $SizeInMB
+              "大小 : {0:N2} GB" -f $SizeInGB
+              "路径 : $NewFilePath"
+              "版本 : $Revision"
+              "SHA256: $FullHash"
+              "VolumeSize: $VolumeSizeArg"
+          ) | ForEach-Object { Write-Host "  $_" }
+          Write-Host "========================================" -ForegroundColor Cyan
+          $OutputZipFileName = "${RevisionName}-${Revision}.7z"
+          $OutputZipPath = Join-Path -Path $DistDir -ChildPath $OutputZipFileName
+          & 7z a -t7z -v$VolumeSizeArg -mx=0 "$OutputZipPath" "$NewFilePath"
+          Write-Host "Generated archive: $OutputZipPath"
+          Write-Host "Split Archive Done..." -ForegroundColor Green
+          
+      - name: Step-5 Delete Old Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
-      - name: Step-7 Delete past completed runs of this workflow
+        
+      - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -99,7 +109,8 @@ jobs:
                 [ "$run_id" = "${{ github.run_id }}" ] && continue
                 gh run delete "$run_id"
               done
-      - name: Step-8 Build New Release
+              
+      - name: Step-7 Build New Release
         uses: softprops/action-gh-release@v3
         with:
           fail_on_unmatched_files: true
@@ -108,17 +119,19 @@ jobs:
             ## Windows11_LTSC_2024_amd64_Update-${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
-            - **SIZE**: ${{ env.ISO_SIZEMB }} 、 ${{ env.ISO_SIZEGB }}
+            - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
+            - **Volume Size**: ${{ env.7zSIZE }}
             - **ORIGINAL**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
             ---
             ### 📦 下载说明
-            使用 7-Zip 进行分卷压缩（每卷 1536M）。
+            使用 7-Zip 进行分卷压缩（每卷 ${{ env.7zSIZE }}）。
             **下载方式**:
             1. 下载所有 `.7z.001`, `.7z.002`, ... 等后缀的文件。
             2. 确保所有文件位于同一文件夹。
             3. 使用 7-Zip 解压 `.7z.001` 即可获得完整的 ISO 文件。
             4. 使用 `https://gh-proxy.com/` 加速下载
             ---
+            > ⚠️ **Note**: This is a multi-volume archive (.7z.001, .7z.002...). Please download all parts before extracting.
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
