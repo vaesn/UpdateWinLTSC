@@ -1,8 +1,8 @@
 name: WIN10_LTSC_2021_amd64
 on:
-  workflow_dispatch: null
+  workflow_dispatch: 
   schedule:
-    - cron: '0 17 14 * *'
+    - cron: '0 18 11 * *'
 permissions:
   contents: write
   actions: write
@@ -22,34 +22,56 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          git clone https://github.com/adavak/Win_ISO_Patching_Scripts.git
+          $maxAttempts = 5
+          $delaySeconds = 30
+          $repoUrl = 'https://github.com/adavak/Win_ISO_Patching_Scripts.git'
+          
+          for ($i = 1; $i -le $maxAttempts; $i++) {
+            Write-Host "Cloning patch scripts (attempt $i/$maxAttempts)..."
+          
+            if (Test-Path patcher) { Remove-Item patcher -Recurse -Force }
+          
+            & git clone --depth 1 $repoUrl patcher
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Clone succeeded"
+              break
+            }
+          
+            Write-Host "git clone failed with exit code $LASTEXITCODE"
+            if ($i -lt $maxAttempts) {
+              Write-Host "Retrying in $delaySeconds seconds..."
+              Start-Sleep -Seconds $delaySeconds
+            } else {
+              throw "git clone failed after $maxAttempts attempts"
+            }
+          }
           
       - name: Step-2 Download from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
-        working-directory: ./Win_ISO_Patching_Scripts
+        working-directory: ./patcher
         run: |
           gh release download Windows_10_LTSC_2021_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*033b7312.zip.*" --dir ./
           7z x *.zip.001 -y
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10src.iso"
           Remove-Item -Path "*.zip.*" -Force
-          Move-Item -Path "../set/W10UI.ini" -Destination "./W10UI.ini" -Force
-          Move-Item -Path "../set/W10UI.cmd" -Destination "./W10UI.cmd" -Force
+          Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
-        working-directory: ./Win_ISO_Patching_Scripts
+        working-directory: ./patcher
         run: |
-          .\Start.cmd
+          & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd"
+          if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
           
       - name: Step-4 Split Archive
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path "./Win_ISO_Patching_Scripts/win10src.iso" -Force -ErrorAction SilentlyContinue
-          $SourceDir = "Win_ISO_Patching_Scripts"
+          Remove-Item -Path "./patcher/win10src.iso" -Force -ErrorAction SilentlyContinue
+          $SourceDir = "patcher"
           $DistDir = "dist_win10"
           $RevisionName = "WIN10_LTSC_2021_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
@@ -160,3 +182,20 @@ jobs:
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
             ./dist_win10/${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
+
+      - name: Step-8 Update README
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $newTimeNOW = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+          $File_NAME = ${{ env.ISO_NAME }}
+          $readmeContent = Get-Content README.md -Raw -Encoding utf8
+          $readmeContent = $readmeContent -replace '(?s)(<!-- WIN10_LTSC_2021_amd64 -->).*?(<!-- /WIN10_LTSC_2021_amd64 -->)', "<!-- WIN10_LTSC_2021_amd64 -->`n$File_NAME ($newTimeNOW UTC)`n<!-- /WIN10_LTSC_2021_amd64 -->"
+          [IO.File]::WriteAllText("$pwd/README.md", $readmeContent, [Text.UTF8Encoding]::new($false))
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "update"
+          git push
+
