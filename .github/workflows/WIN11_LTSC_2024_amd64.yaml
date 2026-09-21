@@ -121,6 +121,7 @@ jobs:
               ('"{0}"' -f $NewFilePath)
           )
           # & 7z a -t7z -v$VolumeSizeArg -mx=0 "$OutputZipPath" "$NewFilePath"
+          Write-Host "Executing command: $Args7z"
           $process = Start-Process -FilePath "7z" -ArgumentList $Args7z -Wait -NoNewWindow -PassThru
           if ($process.ExitCode -ne 0) {
               Write-Error "7z failed with exit code $($process.ExitCode)"
@@ -136,7 +137,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
+        run: gh release delete ${{ env.REVISION_NAME }} --cleanup-tag -y || true
         
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
@@ -186,14 +187,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          $newTimeNOW = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-          $File_NAME = ${{ env.ISO_NAME }}
-          $readmeContent = Get-Content README.md -Raw -Encoding utf8
-          $readmeContent = $readmeContent -replace '(?s)(<!-- WIN11_LTSC_2024_amd64 -->).*?(<!-- /WIN11_LTSC_2024_amd64 -->)', "<!-- WIN11_LTSC_2024_amd64 -->`n$File_NAME ($newTimeNOW UTC)`n<!-- /WIN11_LTSC_2024_amd64 -->"
-          [IO.File]::WriteAllText("$pwd/README.md", $readmeContent, [Text.UTF8Encoding]::new($false))
+          $newTimeNOW = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+          $fileName = $env:ISO_NAME
+          $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
+          $replacement = "<!-- WIN11_LTSC_2024_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN11_LTSC_2024_amd64 -->"
+          $readmeUpdated = [regex]::Replace(
+              $readmeOriginal,
+              '(?s)(<!-- WIN11_LTSC_2024_amd64 -->).*?(<!-- /WIN11_LTSC_2024_amd64 -->)',
+              { $replacement }
+          )
+          [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
+          
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "update"
-          git push
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+              git commit -m "update"
+              git push
+          } else {
+              Write-Host "No changes to commit"
+          }
 
