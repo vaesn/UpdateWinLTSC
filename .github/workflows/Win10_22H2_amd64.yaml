@@ -48,7 +48,6 @@ jobs:
           gh release download win10_22h2_amd64_zh-cn --repo vaesn/win_iso_zip --pattern "*d4e92df7.7z.*" --dir ./
           7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          #curl -L -o win10biz22h2amd64.iso 
           Rename-Item -Path "*.iso" -NewName "win10biz22h2amd64.iso"
           Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
@@ -185,7 +184,6 @@ jobs:
           for ($i = 0; $i -lt 5; $i++) {
               git fetch origin main
               git reset --hard origin/main
-
               $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
               $replacement = "<!-- WIN10_22H2_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN10_22H2_amd64 -->"
               $readmeUpdated = [regex]::Replace(

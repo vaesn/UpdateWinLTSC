@@ -51,11 +51,11 @@ jobs:
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          gh release download Windows_11_LTSC_2024_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*cff9cd2d.zip.*" --dir ./
-          7z x *.zip.001 -y
+          gh release download win11_ltsc_2024_amd64_zh-cn --repo vaesn/win_iso_zip --pattern "*cff9cd2d.7z.*" --dir ./
+          7z x *.7z.001 -y
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win11ltsc2024amd64.iso"
-          Remove-Item -Path "*.zip.*" -Force
+          Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Get-ChildItem -Recurse
