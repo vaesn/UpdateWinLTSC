@@ -71,7 +71,7 @@ jobs:
         working-directory: .
         run: |
           Remove-Item -Path "./patcher/win10src.iso" -Force -ErrorAction SilentlyContinue
-          $SourceDir = "patcher"
+          $SourceDir = "./patcher/assets"
           $DistDir = "dist_win10"
           $RevisionName = "WIN10_LTSC_2021_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null

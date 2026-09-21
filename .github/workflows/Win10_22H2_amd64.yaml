@@ -69,7 +69,7 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          $SourceDir = "patcher"
+          $SourceDir = "./patcher/assets"
           $DistDir = "dist_win10"
           $RevisionName = "WIN10_22H2_amd64"
           Remove-Item -Path "./patcher/win10src22h2.iso" -Force -ErrorAction SilentlyContinue

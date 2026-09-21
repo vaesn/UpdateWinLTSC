@@ -70,7 +70,7 @@ jobs:
         working-directory: .
         run: |
           Remove-Item -Path "./patcher/win11src.iso" -Force -ErrorAction SilentlyContinue
-          $SourceDir = "patcher"
+          $SourceDir = "./patcher/assets"
           $DistDir = "dist_win11"
           $RevisionName = "WIN11_LTSC_2024_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
