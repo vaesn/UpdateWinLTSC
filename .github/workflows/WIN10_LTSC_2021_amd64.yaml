@@ -138,7 +138,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: gh release delete ${{env.REVISION_NAME}} --cleanup-tag -y || true
+        run: gh release delete ${{ env.REVISION_NAME }} --cleanup-tag -y || true
         
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
