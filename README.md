@@ -29,7 +29,7 @@ Use Win_ISO_Patching_Scripts to automatically integrate Windows 10/11 LTSC updat
 
 - Windows 10 22H2 amd64
 <!-- WIN10_22H2_amd64 -->
-NULL
+19045.7727.260912-1745.22H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_87a6985b.iso (2026-09-21 05:34:23 UTC)
 <!-- /WIN10_22H2_amd64 -->
 
 ## Tools
