@@ -57,7 +57,6 @@ jobs:
           Rename-Item -Path "*.iso" -NewName "win10src22h2.iso"
           Remove-Item -Path "*.7z.*" -Force
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
-          Move-Item -Path "../W10UI.cmd" -Destination "./W10UI.cmd" -Force
           
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
