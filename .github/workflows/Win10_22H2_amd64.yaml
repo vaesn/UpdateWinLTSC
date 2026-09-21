@@ -51,11 +51,12 @@ jobs:
         shell: pwsh
         working-directory: ./patcher
         run: |
-          gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*38efd00d.7z.*" --dir ./
-          7z x *.7z.001 -y
+          #gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*38efd00d.7z.*" --dir ./
+          #7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win10src22h2.iso"
-          Remove-Item -Path "*.7z.*" -Force
+          curl -L -o win10src22h2.iso https://ts.buzzheavier.com/d/aurx019brgmc?v=4CtMUtQkFjhN7kbRE2QdU5FEEtLvvV1ZKpWQIrLDXExMeSi8CR2hGs1XgxXm71UwPlar6QDulzGlsGIpaIGSwtmIpW-QsccdxwS488inJBSIlR4z2o_od0MgmJ4cnz7xewwuw9Pr7sPLSNX2hEB8qvQK10ei54_Hjbbv6oHuzFD9-DOitL_WxSWhtHjUvWk62nxD-AEnrK0v1I61egUuYTysVp69jQJCD4RAGeNm95H7Wfy67smGf8n3BrLOGWx-VNYEl3tmT9cGvWgc9KDJizGzDcI4_KfV0zsMQkXeZSyik-nB6g2kpugEIxXmQdQYZ3qtVhJRYqzt6Ligy8iz
+          #Rename-Item -Path "*.iso" -NewName "win10src22h2.iso"
+          #Remove-Item -Path "*.7z.*" -Force
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           
       - name: Step-3 Update By Win_ISO_Patching_Scripts
