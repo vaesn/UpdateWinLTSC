@@ -1,4 +1,4 @@
-name: win10_ltsc_2021_amd64
+name: update-win10-ltsc2021-amd64
 on:
   workflow_dispatch:
   schedule:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  win10_ltsc_2021_amd64:
+  update-win10-ltsc2021-amd64:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -52,7 +52,7 @@ jobs:
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          gh release download win10_ltsc_2021_amd64_zh-cn --repo vaesn/win_iso_zip --pattern "*033b7312.7z.*" --dir ./
+          gh release download win10-ltsc2021-amd64 --repo vaesn/win-iso-archive --pattern "*033b7312.7z.*" --dir ./
           7z x *.7z.001 -y
           Start-Sleep -Seconds 3
           Rename-Item -Path "*.iso" -NewName "win10ltsc2021amd64.iso"
@@ -75,7 +75,7 @@ jobs:
           Remove-Item -Path "./patcherScripts/win10ltsc2021amd64.iso" -Force -ErrorAction SilentlyContinue
           $SourceDir = "./patcherScripts/assets"
           $DistDir = "dist_win10ltsc2021amd64"
-          $RevisionName = "win10_ltsc_2021_amd64"
+          $RevisionName = "win10-ltsc2021-amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
           $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
           $FullHash = (Get-FileHash -Path $IsoFile.FullName -Algorithm SHA256).Hash.ToLower()
@@ -165,7 +165,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows10_ltsc_2021_amd64_update-${{ env.ISO_REVISION }}
+            ## windows10 ltsc 2021 amd64 update ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
@@ -199,10 +199,10 @@ jobs:
               git fetch origin main
               git reset --hard origin/main
               $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
-              $replacement = "<!-- WIN10_LTSC_2021_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN10_LTSC_2021_amd64 -->"
+              $replacement = "<!-- win10-ltsc2021-amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /win10-ltsc2021-amd64 -->"
               $readmeUpdated = [regex]::Replace(
                   $readmeOriginal,
-                  '(?s)(<!-- WIN10_LTSC_2021_amd64 -->).*?(<!-- /WIN10_LTSC_2021_amd64 -->)',
+                  '(?s)(<!-- win10-ltsc2021-amd64 -->).*?(<!-- /win10-ltsc2021-amd64 -->)',
                   { $replacement }
               )
               [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))

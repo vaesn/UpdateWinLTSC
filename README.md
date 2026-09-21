@@ -1,8 +1,6 @@
-# UpdateWinLTSC
+# win10-update-integration
 
-## Usage
-
-Use Win_ISO_Patching_Scripts to automatically integrate Windows 10/11 LTSC updates.
+## Automate Windows 10/11 LTSC update integration with Win_ISO_Patching_Scripts.
 
 ## Original
 
@@ -18,19 +16,19 @@ Use Win_ISO_Patching_Scripts to automatically integrate Windows 10/11 LTSC updat
 ## Update
 
 - Windows 10 LTSC 2021 amd64
-<!-- WIN10_LTSC_2021_amd64 -->
+<!-- win10-ltsc2021-amd64 -->
 19044.7727.260912-1745.21H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_d5d4f940.iso (2026-09-21 03:25:36 UTC)
-<!-- /WIN10_LTSC_2021_amd64 -->
+<!-- /win10-ltsc2021-amd64 -->
 
 - Windows 11 LTSC 2024 amd64
-<!-- WIN11_LTSC_2024_amd64 -->
+<!-- win11-ltsc2024-amd64 -->
 26200.9457.260912-2231.25H2_GE_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_772c5194.iso  (2026-09-21 03:19:56 UTC)
-<!-- /WIN11_LTSC_2024_amd64 -->
+<!-- /win11-ltsc2024-amd64 -->
 
 - Windows 10 22H2 amd64
-<!-- WIN10_22H2_amd64 -->
+<!-- win10-22h2-amd64 -->
 19045.7727.260912-1745.22H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_19d1b743.iso  (2026-09-21 17:23:52 UTC)
-<!-- /WIN10_22H2_amd64 -->
+<!-- /win10-22h2-amd64 -->
 
 ## Tools
 
