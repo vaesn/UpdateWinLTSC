@@ -19,7 +19,7 @@ Use Win_ISO_Patching_Scripts to automatically integrate Windows 10/11 LTSC updat
 
 - Windows 10 LTSC 2021 amd64
 <!-- WIN10_LTSC_2021_amd64 -->
-NULL
+19044.7727.260912-1745.21H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_d5d4f940.iso (2026-09-21 03:25:36 UTC)
 <!-- /WIN10_LTSC_2021_amd64 -->
 
 - Windows 11 LTSC 2024 amd64
