@@ -24,18 +24,14 @@ jobs:
           $maxAttempts = 5
           $delaySeconds = 30
           $repoUrl = 'https://github.com/adavak/Win_ISO_Patching_Scripts.git'
-          
           for ($i = 1; $i -le $maxAttempts; $i++) {
             Write-Host "Cloning patch scripts (attempt $i/$maxAttempts)..."
-          
             if (Test-Path patcher) { Remove-Item patcher -Recurse -Force }
-          
-            & git clone --depth 1 $repoUrl patcher
+            & git clone --depth 1 $repoUrl patcherScripts
             if ($LASTEXITCODE -eq 0) {
               Write-Host "Clone succeeded"
               break
             }
-          
             Write-Host "git clone failed with exit code $LASTEXITCODE"
             if ($i -lt $maxAttempts) {
               Write-Host "Retrying in $delaySeconds seconds..."
@@ -49,19 +45,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
-        working-directory: ./patcher
+        working-directory: ./patcherScripts
         run: |
           #gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*38efd00d.7z.*" --dir ./
           #7z x *.7z.001 -y
-          Start-Sleep -Seconds 3
-          curl -L -o win10src22h2.iso https://ts.buzzheavier.com/d/aurx019brgmc?v=4CtMUtQkFjhN7kbRE2QdU5FEEtLvvV1ZKpWQIrLDXExMeSi8CR2hGs1XgxXm71UwPlar6QDulzGlsGIpaIGSwtmIpW-QsccdxwS488inJBSIlR4z2o_od0MgmJ4cnz7xewwuw9Pr7sPLSNX2hEB8qvQK10ei54_Hjbbv6oHuzFD9-DOitL_WxSWhtHjUvWk62nxD-AEnrK0v1I61egUuYTysVp69jQJCD4RAGeNm95H7Wfy67smGf8n3BrLOGWx-VNYEl3tmT9cGvWgc9KDJizGzDcI4_KfV0zsMQkXeZSyik-nB6g2kpugEIxXmQdQYZ3qtVhJRYqzt6Ligy8iz
-          #Rename-Item -Path "*.iso" -NewName "win10src22h2.iso"
-          #Remove-Item -Path "*.7z.*" -Force
-          Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
+          #Start-Sleep -Seconds 3
           
+          curl -L -o win10biz22h2.iso https://ts.buzzheavier.com/d/aurx019brgmc?v=vSzJW6gPf3WLLRkGxH6IlboMAeyMBUeZWHHVzbhl32o7pu8nVrPSvmnBbXwfOpaFDNHh2HUWuBpELhNA5jNQOYD_Gj8CsVPvtrII_CmA8fIcMbTEZSP8fz2mrmbyU9qxTh5q8QbTgmzOlomI1R6wZ0EXhZYR-GsVWd4wxhjy3ru6BDgcxuRuNqP-E9FOEwVTx8QE1pIaxpXpIYy6qUkdL0fvcW8xSyvor8OSjnCB5_hKu-y7P6hoDBMNLjsDmXJvuFHfZjbC4wPtVmKSo7V6-1DHjtPlprSNq3doyulNQxeInRJTRuiP4sHa9mhXtYFyX-G5_1HpO119MqYmOGYs
+
+          #Rename-Item -Path "*.iso" -NewName "win10biz22h2.iso"
+          #Remove-Item -Path "*.7z.*" -Force
+          New-Item -ItemType Directory -Force -Path "assets"
+          Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
+          Get-ChildItem -Recurse
+
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
-        working-directory: ./patcher
+        working-directory: ./patcherScripts
         run: |
           & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd"
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
@@ -70,10 +70,10 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          $SourceDir = "./patcher/assets"
+          $SourceDir = "./patcherScripts/assets"
           $DistDir = "dist_win10"
           $RevisionName = "WIN10_22H2_amd64"
-          Remove-Item -Path "./patcher/win10src22h2.iso" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "./patcherScripts/win10biz22h2.iso" -Force -ErrorAction SilentlyContinue
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
           $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
           $FullHash = (Get-FileHash -Path $IsoFile.FullName -Algorithm SHA256).Hash.ToLower()
