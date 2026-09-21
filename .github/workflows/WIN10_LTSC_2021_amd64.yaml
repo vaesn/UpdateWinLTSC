@@ -29,9 +29,9 @@ jobs:
           for ($i = 1; $i -le $maxAttempts; $i++) {
             Write-Host "Cloning patch scripts (attempt $i/$maxAttempts)..."
           
-            if (Test-Path patcher) { Remove-Item patcher -Recurse -Force }
+            if (Test-Path patcherScripts) { Remove-Item patcherScripts -Recurse -Force }
           
-            & git clone --depth 1 $repoUrl patcher
+            & git clone --depth 1 $repoUrl patcherScripts
             if ($LASTEXITCODE -eq 0) {
               Write-Host "Clone succeeded"
               break
@@ -50,18 +50,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
-        working-directory: ./patcher
+        working-directory: ./patcherScripts
         run: |
           gh release download Windows_10_LTSC_2021_X64_ZH-CN --repo adavak/win_iso_zip --pattern "*033b7312.zip.*" --dir ./
           7z x *.zip.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win10src.iso"
+          Rename-Item -Path "*.iso" -NewName "win10ltsc2021amd64.iso"
           Remove-Item -Path "*.zip.*" -Force
+          New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
+          Get-ChildItem -Recurse
           
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
-        working-directory: ./patcher
+        working-directory: ./patcherScripts
         run: |
           & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd"
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
@@ -70,9 +72,9 @@ jobs:
         shell: pwsh
         working-directory: .
         run: |
-          Remove-Item -Path "./patcher/win10src.iso" -Force -ErrorAction SilentlyContinue
-          $SourceDir = "./patcher/assets"
-          $DistDir = "dist_win10"
+          Remove-Item -Path "./patcherScripts/win10ltsc2021amd64.iso" -Force -ErrorAction SilentlyContinue
+          $SourceDir = "./patcherScripts/assets"
+          $DistDir = "dist_win10ltsc2021amd64"
           $RevisionName = "WIN10_LTSC_2021_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
           $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
@@ -182,7 +184,7 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
-            ./dist_win10/${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
+            ./dist_win10ltsc2021amd64/${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
 
       - name: Step-8 Update README
         env:
