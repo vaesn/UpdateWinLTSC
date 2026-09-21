@@ -1,4 +1,4 @@
-name: WIN10_LTSC_2021_amd64
+name: win10_ltsc_2021_amd64
 on:
   workflow_dispatch: 
   schedule:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  WIN10_LTSC_2021_amd64:
+  win10_ltsc_2021_amd64:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -75,7 +75,7 @@ jobs:
           Remove-Item -Path "./patcherScripts/win10ltsc2021amd64.iso" -Force -ErrorAction SilentlyContinue
           $SourceDir = "./patcherScripts/assets"
           $DistDir = "dist_win10ltsc2021amd64"
-          $RevisionName = "WIN10_LTSC_2021_amd64"
+          $RevisionName = "win10_ltsc_2021_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
           $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
           $FullHash = (Get-FileHash -Path $IsoFile.FullName -Algorithm SHA256).Hash.ToLower()
@@ -165,7 +165,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## Windows10_LTSC_2021_amd64_Update-${{ env.ISO_REVISION }}
+            ## windows10_ltsc_2021_amd64_update-${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}

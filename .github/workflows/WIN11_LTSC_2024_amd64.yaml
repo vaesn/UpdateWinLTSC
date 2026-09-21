@@ -1,4 +1,4 @@
-name: WIN11_LTSC_2024_amd64
+name: win11_ltsc_2024_amd64
 on:
   workflow_dispatch: 
   schedule:
@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
-  WIN11_LTSC_2024_amd64:
+  win11_ltsc_2024_amd64:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -74,7 +74,7 @@ jobs:
           Remove-Item -Path "./patcherScripts/win11ltsc2024amd64.iso" -Force -ErrorAction SilentlyContinue
           $SourceDir = "./patcherScripts/assets"
           $DistDir = "dist_win11ltsc2024amd64"
-          $RevisionName = "WIN11_LTSC_2024_amd64"
+          $RevisionName = "win11_ltsc_2024_amd64"
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
           $IsoFile = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
           $FullHash = (Get-FileHash -Path $IsoFile.FullName -Algorithm SHA256).Hash.ToLower()
@@ -163,7 +163,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## Windows11_LTSC_2024_amd64_Update-${{ env.ISO_REVISION }}
+            ## Windows11_LTSC_2024_amd64_update-${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
