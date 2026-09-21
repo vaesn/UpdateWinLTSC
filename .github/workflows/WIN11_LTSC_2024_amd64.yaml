@@ -191,6 +191,10 @@ jobs:
         run: |
           $newTimeNOW = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
           $fileName = $env:ISO_NAME
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          
           $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
           $replacement = "<!-- WIN11_LTSC_2024_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN11_LTSC_2024_amd64 -->"
           $readmeUpdated = [regex]::Replace(
@@ -199,11 +203,6 @@ jobs:
               { $replacement }
           )
           [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git pull --rebase origin main
           git add README.md
           git commit -m "update"
           git push
