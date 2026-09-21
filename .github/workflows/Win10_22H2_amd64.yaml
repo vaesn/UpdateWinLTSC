@@ -1,8 +1,8 @@
 name: win10_22h2_amd64
-on:
-  workflow_dispatch: 
+"on":
+  workflow_dispatch: null
   schedule:
-    - cron: '0 20 11 * *'
+    - cron: 0 20 11 * *
 permissions:
   contents: write
   actions: write
@@ -16,7 +16,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
-          
       - name: Step-1 Checkout Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: .
@@ -40,32 +39,27 @@ jobs:
               throw "git clone failed after $maxAttempts attempts"
             }
           }
-          
       - name: Step-2 Download from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          #gh release download Windows10ISO --repo yuanpeirong/UpdateWinISO --pattern "*38efd00d.7z.*" --dir ./
-          #7z x *.7z.001 -y
-          #Start-Sleep -Seconds 3
-          
-          curl -L -o win10biz22h2amd64.iso https://ts.buzzheavier.com/d/aurx019brgmc?v=vSzJW6gPf3WLLRkGxH6IlboMAeyMBUeZWHHVzbhl32o7pu8nVrPSvmnBbXwfOpaFDNHh2HUWuBpELhNA5jNQOYD_Gj8CsVPvtrII_CmA8fIcMbTEZSP8fz2mrmbyU9qxTh5q8QbTgmzOlomI1R6wZ0EXhZYR-GsVWd4wxhjy3ru6BDgcxuRuNqP-E9FOEwVTx8QE1pIaxpXpIYy6qUkdL0fvcW8xSyvor8OSjnCB5_hKu-y7P6hoDBMNLjsDmXJvuFHfZjbC4wPtVmKSo7V6-1DHjtPlprSNq3doyulNQxeInRJTRuiP4sHa9mhXtYFyX-G5_1HpO119MqYmOGYs
-
-          #Rename-Item -Path "*.iso" -NewName "win10biz22h2amd64.iso"
-          #Remove-Item -Path "*.7z.*" -Force
+          gh release download win10_22h2_amd64_zh-cn --repo vaesn/win_iso_zip --pattern "*d4e92df7.7z.*" --dir ./
+          7z x *.7z.001 -y
+          Start-Sleep -Seconds 3
+          #curl -L -o win10biz22h2amd64.iso 
+          Rename-Item -Path "*.iso" -NewName "win10biz22h2amd64.iso"
+          Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Get-ChildItem -Recurse
-
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
           & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd"
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
-          
       - name: Step-4 Split Archive
         shell: pwsh
         working-directory: .
@@ -131,7 +125,6 @@ jobs:
           Write-Host "Generated archive: $OutputZipPath"
           Get-ChildItem -Recurse
           Write-Host "Split Archive Done..." -ForegroundColor Green
-          
       - name: Step-5 Delete Old Release
         if: ${{ always() }}
         continue-on-error: true
@@ -139,7 +132,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: gh release delete ${{ env.REVISION_NAME }} --cleanup-tag -y || true
-        
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
         continue-on-error: true
@@ -155,7 +147,6 @@ jobs:
                 [ "$run_id" = "${{ github.run_id }}" ] && continue
                 gh run delete "$run_id" || true
               done
-              
       - name: Step-7 Build New Release
         uses: softprops/action-gh-release@v3
         with:
@@ -182,7 +173,6 @@ jobs:
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
             ./dist_win10biz22h2amd64/${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}.7z.*
-
       - name: Step-8 Update README
         env:
           GH_TOKEN: ${{ github.token }}
@@ -192,20 +182,20 @@ jobs:
           $fileName = $env:ISO_NAME
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
+          for ($i = 0; $i -lt 5; $i++) {
+              git fetch origin main
+              git reset --hard origin/main
 
-          $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
-          $replacement = "<!-- WIN10_22H2_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN10_22H2_amd64 -->"
-          $readmeUpdated = [regex]::Replace(
-              $readmeOriginal,
-              '(?s)(<!-- WIN10_22H2_amd64 -->).*?(<!-- /WIN10_22H2_amd64 -->)',
-              { $replacement }
-          )
-          [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
-          git add README.md
-          git commit -m "update"
-          git push
-
-
-
-
+              $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
+              $replacement = "<!-- WIN10_22H2_amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /WIN10_22H2_amd64 -->"
+              $readmeUpdated = [regex]::Replace(
+                  $readmeOriginal,
+                  '(?s)(<!-- WIN10_22H2_amd64 -->).*?(<!-- /WIN10_22H2_amd64 -->)',
+                  { $replacement }
+              )
+              [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
+              git add README.md
+              git commit -m "update" --allow-empty
+              git push && break
+              Start-Sleep 3
+          }
