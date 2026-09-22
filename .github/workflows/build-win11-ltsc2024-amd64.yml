@@ -203,9 +203,11 @@ jobs:
                   '(?s)(<!-- win11-ltsc2024-amd64 -->).*?(<!-- /win11-ltsc2024-amd64 -->)',
                   { $replacement }
               )
-              [IO.File]::WriteAllText("$pwd/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
+              if ($readmeUpdated -eq $readmeOriginal) { break }
+              [IO.File]::WriteAllText("$PWD/README.md", $readmeUpdated, [Text.UTF8Encoding]::new($false))
               git add README.md
-              git commit -m "update" --allow-empty
-              git push && break
+              git commit -m "update"
+              git push
+              if ($LASTEXITCODE -eq 0) { break }
               Start-Sleep 3
           }
