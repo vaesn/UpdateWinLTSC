@@ -54,12 +54,12 @@ jobs:
           gh release download win11-ltsc2024-amd64 --repo vaesn/win-iso-archive --pattern "*cff9cd2d.7z.*" --dir ./
           7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win11ltsc2024amd64.iso"
+          Rename-Item -Path "*cff9cd2d.iso" -NewName "win11ltsc2024amd64.iso"
           Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Remove-Item -Path "../Drivers/ALL/w10" -Recurse -Force
-          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
+          Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
 
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
@@ -146,7 +146,7 @@ jobs:
           & 7z a -t7z -v"$VolumeSizeArg" -mx=0 "$OutputZipPath" "$NewFilePath"
 
           Write-Host "Generated archive: $OutputZipPath"
-          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
+          Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
           Get-ChildItem "dist_win11ltsc2024amd64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
@@ -166,7 +166,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: gh release delete ${{ env.REVISION_NAME }} --cleanup-tag -y || true
+        run: gh release delete "${{ env.REVISION_NAME }}" --cleanup-tag -y || true
 
       - name: Step-6 Delete past completed runs of this workflow
         if: ${{ always() }}
@@ -176,13 +176,13 @@ jobs:
         shell: bash
         run: |
           gh run list \
-            --workflow "${{ github.workflow }}" \
-            --json databaseId,status,conclusion \
-            --jq '.[] | select(.status == "completed") | .databaseId' \
-            | while read -r run_id; do
-                [ "$run_id" = "${{ github.run_id }}" ] && continue
-                gh run delete "$run_id" || true
-              done
+            --repo "${{ github.repository }}" --workflow "${{ github.workflow }}" --limit 30 \
+            --json databaseId,status \
+            --jq '.[] | select(.status=="completed") | .databaseId' | while read -r id; do
+              [ -z "$id" ] && continue
+              [ "$id" = "${{ github.run_id }}" ] && continue
+              gh run delete "$id" --repo "${{ github.repository }}" || true
+            done
 
       - name: Step-7 Build New Release
         uses: softprops/action-gh-release@v3

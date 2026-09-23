@@ -1,8 +1,8 @@
 name: update-win10-22h2-amd64
-"on":
-  workflow_dispatch: null
+on:
+  workflow_dispatch:
   schedule:
-    - cron: 0 20 11 * *
+    - cron: "0 20 11 * *"
 permissions:
   contents: write
   actions: write
@@ -49,12 +49,12 @@ jobs:
           gh release download win10-22h2-amd64 --repo vaesn/win-iso-archive --pattern "*d4e92df7.7z.*" --dir ./
           7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*.iso" -NewName "win10biz22h2amd64.iso"
+          Rename-Item -Path "*d4e92df7.iso" -NewName "win10biz22h2amd64.iso"
           Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Remove-Item -Path "../Drivers/ALL/w11" -Recurse -Force
-          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
+          Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
 
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
@@ -62,6 +62,7 @@ jobs:
         run: |
           & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd" 2>&1 | Tee-Object -FilePath "./update-win10-22h2-amd64.log" -Encoding utf8
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
+
       - name: Step-4 Split Archive
         shell: pwsh
         working-directory: .
@@ -140,7 +141,7 @@ jobs:
           & 7z a -t7z -v"$VolumeSizeArg" -mx=0 "$OutputZipPath" "$NewFilePath"
 
           Write-Host "Generated archive: $OutputZipPath"
-          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
+          Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
           Get-ChildItem "dist_win10biz22h2amd64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
@@ -154,15 +155,15 @@ jobs:
           Write-Host ("最小卷: {0:N2} MB" -f $min)
           Write-Host ("差值  : {0:N2} MB" -f ($max - $min))
 
-      - name: Step-5 Delete Old Release
+      - name: Step-6 Delete Old Release
         if: ${{ always() }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: gh release delete ${{ env.REVISION_NAME }} --cleanup-tag -y || true
+        run: gh release delete "${{ env.REVISION_NAME }}" --cleanup-tag -y || true
 
-      - name: Step-6 Delete past completed runs of this workflow
+      - name: Step-7 Delete past completed runs of this workflow
         if: ${{ always() }}
         continue-on-error: true
         env:
@@ -170,13 +171,13 @@ jobs:
         shell: bash
         run: |
           gh run list \
-            --workflow "${{ github.workflow }}" \
-            --json databaseId,status,conclusion \
-            --jq '.[] | select(.status == "completed") | .databaseId' \
-            | while read -r run_id; do
-                [ "$run_id" = "${{ github.run_id }}" ] && continue
-                gh run delete "$run_id" || true
-              done
+            --repo "${{ github.repository }}" --workflow "${{ github.workflow }}" --limit 30 \
+            --json databaseId,status \
+            --jq '.[] | select(.status=="completed") | .databaseId' | while read -r id; do
+              [ -z "$id" ] && continue
+              [ "$id" = "${{ github.run_id }}" ] && continue
+              gh run delete "$id" --repo "${{ github.repository }}" || true
+            done
 
       - name: Step-7 Build New Release
         uses: softprops/action-gh-release@v3
