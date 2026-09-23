@@ -90,9 +90,8 @@ jobs:
           Rename-Item -Path $IsoFull -NewName $NewFileName -Force
 
           $Revision    = $BaseName.Split('-')[0]
-          $SizeInBytes = $IsoLength
-          $SizeInMB    = $SizeInBytes / 1MB
-          $SizeInGB    = $SizeInBytes / 1GB
+          $SizeInMB    = $IsoLength / 1MB
+          $SizeInGB    = $IsoLength / 1GB
 
           $TotalMB = [Math]::Ceiling($SizeInMB)
           $N       = [Math]::Ceiling($TotalMB / ($MaxVolMB - $Reserve))
@@ -144,11 +143,11 @@ jobs:
           Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
-          Get-ChildItem "dist_win10biz22h2amd64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+          Get-ChildItem "./dist_win10biz22h2amd64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
             Write-Host ("  {0}  {1:N2} MB" -f $_.Name, ($_.Length / 1MB))
           }
 
-          $vols = Get-ChildItem "dist_win10biz22h2amd64/*.7z.*"
+          $vols = Get-ChildItem "./dist_win10biz22h2amd64/*.7z.*"
           $max = ($vols | Measure-Object Length -Maximum).Maximum / 1MB
           $min = ($vols | Measure-Object Length -Minimum).Minimum / 1MB
           Write-Host ("最大卷: {0:N2} MB" -f $max)
