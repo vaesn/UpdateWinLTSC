@@ -57,9 +57,22 @@ jobs:
           #Start-Sleep -Seconds 3
           #Rename-Item -Path "*9c09ff24.iso" -NewName "win10ltsc2019amd64.iso"
           #Remove-Item -Path "*9c09ff24.7z.*" -Force
+          choco install aria2 -y --no-progress
 
-          curl -L -o win10ltsc2019amd64.iso "https://tempdelivery.13376767.xyz/cndb/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=4134&u=ZIel6obyFQrYAKd3&sig=9f90ffd529f1af81d5902fa1c2ae18b651954509ed031d129ae8deaa5465f10d"
+          $url = 'https://tempdelivery.13376767.xyz/cndb/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=4134&u=ZIel6obyFQrYAKd3&sig=9f90ffd529f1af81d5902fa1c2ae18b651954509ed031d129ae8deaa5465f10d'
+          aria2c.exe `
+            -x 16 -s 16 -k 1M `
+            --continue=true `
+            --max-tries=5 `
+            --retry-wait=10 `
+            --timeout=60 `
+            --file-allocation=none `
+            --console-log-level=warn `
+            --summary-interval=30 `
+            -o win10ltsc2019amd64.iso `
+            "$url"
 
+          Rename-Item -Path "*.iso" -NewName "win10ltsc2019amd64.iso"
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Remove-Item -Path "../Drivers/ALL/w11" -Recurse -Force
