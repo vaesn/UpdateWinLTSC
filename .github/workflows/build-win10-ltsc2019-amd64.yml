@@ -57,22 +57,30 @@ jobs:
           #Start-Sleep -Seconds 3
           #Rename-Item -Path "*9c09ff24.iso" -NewName "win10ltsc2019amd64.iso"
           #Remove-Item -Path "*9c09ff24.7z.*" -Force
-          choco install aria2 -y --no-progress
 
-          $url = 'https://tempdelivery.13376767.xyz/cndb/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=4134&u=ZIel6obyFQrYAKd3&sig=9f90ffd529f1af81d5902fa1c2ae18b651954509ed031d129ae8deaa5465f10d'
+          $ISO_URL = "https://tempdelivery.13376767.xyz/db/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=31898&u=G4Vy4i2eGJGnlBcT&sig=244eb0b100829b6b55e72501f214dc285002ae502d0f679cadcb71c5c5eb4cd9"
+
           aria2c.exe `
-            -x 16 -s 16 -k 1M `
+            --dir=./ `
+            --out=win10ltsc2019amd64.iso `
+            --split=16 `
+            --max-connection-per-server=16 `
+            --min-split-size=4M `
+            --file-allocation=none `
             --continue=true `
             --max-tries=5 `
             --retry-wait=10 `
             --timeout=60 `
-            --file-allocation=none `
+            --connect-timeout=30 `
+            --disk-cache=64M `
             --console-log-level=warn `
-            --summary-interval=30 `
-            -o win10ltsc2019amd64.iso `
-            "$url"
+            --summary-interval=10 `
+            --async-dns=true `
+            --enable-http-pipelining=true `
+            --check-integrity=true `
+            --checksum=sha-256=aa4ea00581aa84999dbfe0627499b392e10c75912d6e2f1635eb7c4b9139fb5f `
+            "$env:ISO_URL"
 
-          Rename-Item -Path "*.iso" -NewName "win10ltsc2019amd64.iso"
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Remove-Item -Path "../Drivers/ALL/w11" -Recurse -Force
