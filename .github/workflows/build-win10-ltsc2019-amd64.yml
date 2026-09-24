@@ -52,15 +52,15 @@ jobs:
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          #gh release download win10-ltsc2019-amd64 --repo vaesn/win-iso-archive --pattern "*9c09ff24.7z.*" --dir ./
-          #7z x *.7z.001 -y
-          #Start-Sleep -Seconds 3
-          #Rename-Item -Path "*9c09ff24.iso" -NewName "win10ltsc2019amd64.iso"
-          #Remove-Item -Path "*9c09ff24.7z.*" -Force
+          gh release download win10-ltsc2019-amd64 --repo vaesn/win-iso-archive --pattern "*9c09ff24.7z.*" --dir ./
+          7z x *9c09ff24.7z.001 -y
+          Start-Sleep -Seconds 3
+          Rename-Item -Path "*9c09ff24.iso" -NewName "win10ltsc2019amd64.iso"
+          Remove-Item -Path "*9c09ff24.7z.*" -Force
           # https://ntriver.org/drive?cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso
 
-          $ISO_URL = "https://tempdelivery.13376767.xyz/db/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=31898&u=M5OykdVKuZpUQbRh&sig=96843fd5bc1122ee4064bcca9a92800da5410df6578080da3c7f220d92b7a6e5"
-
+          <#
+          $isoUrl = ""
           aria2c.exe `
             --dir=. `
             --out=win10ltsc2019amd64.iso `
@@ -75,10 +75,11 @@ jobs:
             --connect-timeout=30 `
             --disk-cache=64M `
             --console-log-level=warn `
-            --summary-interval=10 `
+            --summary-interval=3 `
             --async-dns=true `
             --enable-http-pipelining=true `
-            "$ISO_URL"
+            "$isoUrl"
+            #>
 
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
