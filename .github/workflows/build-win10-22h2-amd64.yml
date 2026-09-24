@@ -70,7 +70,7 @@ jobs:
           $SourceDir    = "./patcherScripts/assets"
           $DistDir      = "dist_win10biz22h2amd64"
           $RevisionName = "win10-22h2-amd64"
-          $MaxVolMB     = 1792
+          $MaxVolMB     = 1895
           $Reserve      = 16
           $MaxDiffMB    = 128
 
@@ -232,7 +232,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows10 22h2 amd64 update ${{ env.ISO_REVISION }}
+            ## windows10 22h2 amd64 update zh_CN ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}

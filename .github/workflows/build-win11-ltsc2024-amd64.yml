@@ -2,7 +2,7 @@ name: update-win11-ltsc2024-amd64
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 16 18 * *"
+    - cron: "0 18 18 * *"
 permissions:
   contents: write
   actions: write
@@ -75,7 +75,7 @@ jobs:
           $SourceDir    = "./patcherScripts/assets"
           $DistDir      = "dist_win11ltsc2024amd64"
           $RevisionName = "win11-ltsc2024-amd64"
-          $MaxVolMB     = 1792
+          $MaxVolMB     = 1985
           $Reserve      = 16
           $MaxDiffMB    = 128
 
@@ -237,7 +237,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows11 ltsc 2024 amd64 update ${{ env.ISO_REVISION }}
+            ## windows11 ltsc 2024 amd64 zh_CN update ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
