@@ -1,39 +1,44 @@
 # win10-update-integration
 
-## Automate Windows 10/11 LTSC update integration with Win_ISO_Patching_Scripts.
+## Automate Windows 10/11 LTSC update integration with Win_ISO_Patching_Scripts
 
 ## Original
 
-- Windows 10 LTSC 2021 amd64
+- **_Windows 10 LTSC 2019 amd64_**
+  - cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso
+  <br />
+- **_Windows 10 LTSC 2021 amd64_**
   - zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
-
-- Windows 11 LTSC 2024 amd64
+  <br />
+- **_Windows 11 LTSC 2024 amd64_**
   - zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
-
-- Windows 10 22H2 amd64
+  <br />
+- **_Windows 10 22H2 amd64_**
   - cn_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso
+  <br />
 
 ## Update
 
-- Windows 10 LTSC 2019 amd64
+- **_Windows 10 LTSC 2019 amd64_**
 <!-- win10-ltsc2019-amd64 -->
 NULL
 <!-- /win10-ltsc2019-amd64 -->
-
-- Windows 10 LTSC 2021 amd64
+<br />
+- **_Windows 10 LTSC 2021 amd64_**
 <!-- win10-ltsc2021-amd64 -->
 19044.7727.260912-1745.21H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_e19f91d4.iso (2026-09-24 01:46:46 UTC)
 <!-- /win10-ltsc2021-amd64 -->
-
-- Windows 11 LTSC 2024 amd64
+<br />
+- **_Windows 11 LTSC 2024 amd64_**
 <!-- win11-ltsc2024-amd64 -->
 26200.9550.260919-2240.25H2_GE_RELEASE_SVC_PROD3_CLIENT_X64FRE_ZH-CN_03b02c35.iso (2026-09-24 01:29:26 UTC)
 <!-- /win11-ltsc2024-amd64 -->
-
-- Windows 10 22H2 amd64
+<br />
+- **_Windows 10 22H2 amd64_**
 <!-- win10-22h2-amd64 -->
 19045.7727.260912-1745.22H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_f757ef5e.iso (2026-09-24 18:52:39 UTC)
 <!-- /win10-22h2-amd64 -->
+<br />
 
 ## Tools
 
