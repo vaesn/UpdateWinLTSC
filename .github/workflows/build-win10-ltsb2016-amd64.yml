@@ -59,8 +59,9 @@ jobs:
           #Remove-Item -Path "*9060409.7z.*" -Force
           # https://ntriver.org/drive?cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso
 
-          <# iso #>
-          $isoUrl = "https://tempdelivery.13376767.xyz/db/cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso?t=NFfBQjaHGHAJx2Gs&a=31898&u=6OkF3eZFxFCM84qS&sig=a080060c116028d550edf6ae42ff624308240fa1b62b253a2bca9699adc8d9fe"
+          <#
+          $isoUrl = ""
+
           aria2c.exe `
             --dir=. `
             --out=win10ltsb2016amd64.iso `
@@ -79,6 +80,7 @@ jobs:
             --async-dns=true `
             --enable-http-pipelining=true `
             "$isoUrl"
+            #>
 
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
@@ -255,13 +257,13 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows 10 ltsc 2019 amd64 zh_CN update ${{ env.ISO_REVISION }}
+            ## windows 10 ltsb 2016 amd64 zh_CN update ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
             - **Volume Size**: ${{ env.VOLUME_SIZE }}
             - **Volume Count**: ${{ env.PART_COUNT }}
-            - **ORIGINAL**: cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso
+            - **ORIGINAL**: cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso
             ---
             ### 📦 下载说明
             使用 7-Zip 进行分卷压缩，每卷 ${{ env.VOLUME_SIZE }}，共 ${{ env.PART_COUNT }} 卷。
