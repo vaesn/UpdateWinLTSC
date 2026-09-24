@@ -61,13 +61,12 @@ jobs:
 
           $ISO_URL = "https://tempdelivery.13376767.xyz/db/cn_windows_10_enterprise_ltsc_2019_x64_dvd_9c09ff24.iso?t=NFfBQjaHGHAJx2Gs&a=31898&u=M5OykdVKuZpUQbRh&sig=96843fd5bc1122ee4064bcca9a92800da5410df6578080da3c7f220d92b7a6e5"
 
-
           aria2c.exe `
-            --dir=./ `
+            --dir=. `
             --out=win10ltsc2019amd64.iso `
             --split=16 `
             --max-connection-per-server=16 `
-            --min-split-size=4M `
+            --min-split-size=8M `
             --file-allocation=none `
             --continue=true `
             --max-tries=5 `
