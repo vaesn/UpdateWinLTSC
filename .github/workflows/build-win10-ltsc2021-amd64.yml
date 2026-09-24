@@ -175,12 +175,14 @@ jobs:
         shell: bash
         run: |
           gh run list \
-            --repo "${{ github.repository }}" --workflow "${{ github.workflow }}" --limit 30 \
+            --repo "${{ github.repository }}" \
+            --workflow "${{ github.workflow }}" \
+            --limit 100 \
             --json databaseId,status \
-            --jq '.[] | select(.status=="completed") | .databaseId' | while read -r id; do
-              [ -z "$id" ] && continue
-              [ "$id" = "${{ github.run_id }}" ] && continue
-              gh run delete "$id" --repo "${{ github.repository }}" || true
+            --jq '.[] | select(.status=="completed") | .databaseId' | while read -r run_id; do
+              if [ -z "$run_id" ]; then continue; fi
+              if [ "$run_id" = "${{ github.run_id }}" ]; then continue; fi
+              gh run delete "$run_id" --repo "${{ github.repository }}" || true
             done
 
       - name: Step-7 Build New Release
