@@ -15,6 +15,11 @@
 
 ## Update
 
+- Windows 10 LTSC 2019 amd64
+<!-- win10-ltsc2019-amd64 -->
+NULL
+<!-- /win10-ltsc2019-amd64 -->
+
 - Windows 10 LTSC 2021 amd64
 <!-- win10-ltsc2021-amd64 -->
 19044.7727.260912-1745.21H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_e19f91d4.iso (2026-09-24 01:46:46 UTC)
