@@ -39,7 +39,6 @@ NULL
 19045.7727.260912-1745.22H2_RELEASE_SVC_IM_CLIENT_X64FRE_ZH-CN_f757ef5e.iso (2026-09-24 18:52:39 UTC)
 <!-- /win10-22h2-amd64 -->
 <br />
-
 ## Tools
 
 - Microsoft Activation Scripts (MAS)  <https://massgrave.dev>
