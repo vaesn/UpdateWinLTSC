@@ -37,12 +37,12 @@ on:
         type: string
       delete_old_release:
         description: "Delete existing Release with same tag before upload (uncheck to APPEND to it)"
-        required: true
+        required: false
         type: boolean
         default: false
       delete_old_runs:
         description: "Delete past completed runs of this workflow (keep Actions page clean)"
-        required: true
+        required: false
         type: boolean
         default: false
 
