@@ -35,9 +35,9 @@
 
 - **_Windows 10 LTSB 2016 amd64_**
 
-<!-- win10-ltsB2016-amd64 -->
+<!-- win10-ltsb2016-amd64 -->
 NULL
-<!-- /win10-ltsB2016-amd64 -->
+<!-- /win10-ltsb2016-amd64 -->
 
 <br />
 
