@@ -230,15 +230,15 @@ jobs:
           # "$ISO_URL"                       下载地址，用双引号包裹防止空格问题
           aria2c \
             --dir=./original \
-            --split=16 \
-            --max-connection-per-server=16 \
-            --min-split-size=8M \
+            --split=8 \
+            --max-connection-per-server=8 \
+            --min-split-size=4M \
             --file-allocation=none \
             --continue=true \
-            --max-tries=5 \
-            --retry-wait=10 \
-            --timeout=60 \
-            --connect-timeout=30 \
+            --max-tries=8 \
+            --retry-wait=16 \
+            --timeout=120 \
+            --connect-timeout=60 \
             --disk-cache=64M \
             --console-log-level=warn \
             --summary-interval=3 \
