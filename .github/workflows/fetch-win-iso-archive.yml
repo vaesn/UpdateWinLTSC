@@ -230,21 +230,25 @@ jobs:
           # "$ISO_URL"                       下载地址，用双引号包裹防止空格问题
           aria2c \
             --dir=./original \
-            --split=8 \
-            --max-connection-per-server=8 \
+            --split=4 \
+            --max-connection-per-server=4 \
             --min-split-size=4M \
+            --max-overall-download-limit=2M
             --file-allocation=none \
             --continue=true \
-            --max-tries=8 \
-            --retry-wait=16 \
+            --max-tries=20 \
+            --retry-wait=30 \
             --timeout=120 \
             --connect-timeout=60 \
-            --disk-cache=64M \
+            --disk-cache=32M \
             --console-log-level=warn \
             --summary-interval=3 \
             --async-dns=true \
             --enable-http-pipelining=true \
             --content-disposition=true \
+            --max-file-not-found=10
+            --lowest-speed-limit=10K
+            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36"
             "$ISO_URL"
 
           # 打印 ./original 下的文件，便于排查 aria2c 实际命名了什么
