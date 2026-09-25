@@ -1,19 +1,8 @@
-name: update-win10-ltsb2016-amd64
+name: update-win10-ltsc2021-x64
 on:
   workflow_dispatch:
-    inputs:
-      delete_old_release:
-        description: "Delete existing Release with same tag before upload (uncheck to APPEND to it)"
-        required: false
-        type: boolean
-        default: false
-      delete_old_runs:
-        description: "Delete past completed runs of this workflow (keep Actions page clean)"
-        required: false
-        type: boolean
-        default: false
   schedule:
-    - cron: "16 12 18 * *"
+    - cron: "43 16 18 * *"
 permissions:
   contents: write
   actions: write
@@ -22,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update-win10-ltsb2016-amd64:
+  update-win10-ltsc2021-x64:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -63,45 +52,21 @@ jobs:
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          gh release download win10-ltsb2016-amd64 --repo vaesn/win-iso-archive --pattern "*9060409.7z.*" --dir ./
-          7z x *9060409.7z.001 -y
+          gh release download win10-ltsc2021-x64 --repo vaesn/win-iso-archive --pattern "*033b7312.7z.*" --dir ./
+          7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*9060409.iso" -NewName "win10ltsb2016amd64.iso"
-          Remove-Item -Path "*9060409.7z.*" -Force
-
-          # https://ntriver.org/drive?cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso
-
-          <#
-          $isoUrl = ""
-          aria2c.exe `
-            --dir=. `
-            --out=win10ltsb2016amd64.iso `
-            --split=16 `
-            --max-connection-per-server=16 `
-            --min-split-size=8M `
-            --file-allocation=none `
-            --continue=true `
-            --max-tries=5 `
-            --retry-wait=10 `
-            --timeout=60 `
-            --connect-timeout=30 `
-            --disk-cache=64M `
-            --console-log-level=warn `
-            --summary-interval=3 `
-            --async-dns=true `
-            --enable-http-pipelining=true `
-            "$isoUrl"
-            #>
-
+          Rename-Item -Path "*033b7312.iso" -NewName "win10ltsc2021x64.iso"
+          Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
           Remove-Item -Path "../Drivers/ALL/w11" -Recurse -Force
+          Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
 
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd" 2>&1 | Tee-Object -FilePath "./update-win10-ltsb2016-amd64.log" -Encoding utf8
+          & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd" 2>&1 | Tee-Object -FilePath "./update-win10-ltsc2021-x64.log" -Encoding utf8
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
 
       - name: Step-4 Split Archive
@@ -109,14 +74,14 @@ jobs:
         working-directory: .
         run: |
           $SourceDir    = "./patcherScripts/assets"
-          $DistDir      = "dist_win10ltsb2016amd64"
-          $RevisionName = "win10-ltsb2016-amd64"
+          $DistDir      = "dist_win10ltsc2021x64"
+          $RevisionName = "win10-ltsc2021-x64"
           $MaxVolMB     = 1895
           $Reserve      = 16
           $MaxDiffMB    = 128
 
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
-          Remove-Item -Path "./patcherScripts/win10ltsb2016amd64.iso" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "./patcherScripts/win10ltsc2021x64.iso" -Force -ErrorAction SilentlyContinue
           $Iso = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
 
           $BaseName  = $Iso.BaseName
@@ -183,7 +148,11 @@ jobs:
           Write-Host "Generated archive: $OutputZipPath"
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
-          $vols = Get-ChildItem "./dist_win10ltsb2016amd64/*.7z.*"
+          Get-ChildItem "./dist_win10ltsc2021x64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+            Write-Host ("  {0}  {1:N2} MB" -f $_.Name, ($_.Length / 1MB))
+          }
+
+          $vols = Get-ChildItem "./dist_win10ltsc2021x64/*.7z.*"
           $max = ($vols | Measure-Object Length -Maximum).Maximum / 1MB
           $min = ($vols | Measure-Object Length -Minimum).Minimum / 1MB
           Write-Host ("最大卷: {0:N2} MB" -f $max)
@@ -237,7 +206,7 @@ jobs:
           Write-Host "========================================" -ForegroundColor Cyan
 
       - name: Step-5 Delete Old Release
-        if: ${{ github.event.inputs.delete_old_release == 'true' }}
+        if: ${{ always() }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -245,7 +214,7 @@ jobs:
         run: gh release delete "${{ env.REVISION_NAME }}" --cleanup-tag -y || true
 
       - name: Step-6 Delete past completed runs of this workflow
-        if: ${{ github.event.inputs.delete_old_runs == 'true' }}
+        if: ${{ always() }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -268,13 +237,13 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows 10 ltsb 2016 amd64 zh_CN update ${{ env.ISO_REVISION }}
+            ## windows10 ltsc 2021 x64 zh_CN update ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
             - **Volume Size**: ${{ env.VOLUME_SIZE }}
             - **Volume Count**: ${{ env.PART_COUNT }}
-            - **ORIGINAL**: cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso
+            - **ORIGINAL**: zh-cn_windows_10_enterprise_ltsc_2021_x64_dvd_033b7312.iso
             ---
             ### 📦 下载说明
             使用 7-Zip 进行分卷压缩，每卷 ${{ env.VOLUME_SIZE }}，共 ${{ env.PART_COUNT }} 卷。
@@ -293,7 +262,7 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
-            ./dist_win10ltsb2016amd64/*.7z.*
+            ./dist_win10ltsc2021x64/*.7z.*
             ./patcherScripts/*.log
 
       - name: Step-8 Update README
@@ -309,10 +278,10 @@ jobs:
               git fetch origin main
               git reset --hard origin/main
               $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
-              $replacement = "<!-- win10-ltsb2016-amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /win10-ltsb2016-amd64 -->"
+              $replacement = "<!-- win10-ltsc2021-x64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /win10-ltsc2021-x64 -->"
               $readmeUpdated = [regex]::Replace(
                   $readmeOriginal,
-                  '(?s)(<!-- win10-ltsb2016-amd64 -->).*?(<!-- /win10-ltsb2016-amd64 -->)',
+                  '(?s)(<!-- win10-ltsc2021-x64 -->).*?(<!-- /win10-ltsc2021-x64 -->)',
                   { $replacement }
               )
               if ($readmeUpdated -eq $readmeOriginal) { break }

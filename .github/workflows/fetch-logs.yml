@@ -3,11 +3,11 @@ name: fetch-logs
 on:
   workflow_run:
     workflows:
-      - "update-win10-22h2-amd64"
-      - "update-win10-ltsb2016-amd64"
-      - "update-win10-ltsc2019-amd64"
-      - "update-win10-ltsc2021-amd64"
-      - "update-win11-ltsc2024-amd64"
+      - "update-win10-22h2-x64"
+      - "update-win10-ltsb2016-x64"
+      - "update-win10-ltsc2019-x64"
+      - "update-win10-ltsc2021-x64"
+      - "update-win11-ltsc2024-x64"
     types: [completed]
 
 permissions:
@@ -27,11 +27,11 @@ jobs:
         id: fetch
         run: |
           case "${{ github.event.workflow_run.name }}" in
-            "update-win10-22h2-amd64") TAG="win10-22h2-amd64" ;;
-            "update-win10-ltsb2016-amd64") TAG="win10-ltsb2016-amd64" ;;
-            "update-win10-ltsc2019-amd64") TAG="win10-ltsc2019-amd64" ;;
-            "update-win10-ltsc2021-amd64") TAG="win10-ltsc2021-amd64" ;;
-            "update-win11-ltsc2024-amd64") TAG="win11-ltsc2024-amd64" ;;
+            "update-win10-22h2-x64") TAG="win10-22h2-x64" ;;
+            "update-win10-ltsb2016-x64") TAG="win10-ltsb2016-x64" ;;
+            "update-win10-ltsc2019-x64") TAG="win10-ltsc2019-x64" ;;
+            "update-win10-ltsc2021-x64") TAG="win10-ltsc2021-x64" ;;
+            "update-win11-ltsc2024-x64") TAG="win11-ltsc2024-x64" ;;
             *) echo "::error::unknown workflow"; exit 1 ;;
           esac
 

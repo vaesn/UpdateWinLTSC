@@ -1,8 +1,8 @@
-name: update-win10-22h2-amd64
+name: update-win11-ltsc2024-x64
 on:
   workflow_dispatch:
   schedule:
-    - cron: "26 20 18 * *"
+    - cron: "28 18 18 * *"
 permissions:
   contents: write
   actions: write
@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
-  update-win10-22h2-amd64:
+  update-win11-ltsc2024-x64:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -24,14 +24,18 @@ jobs:
           $maxAttempts = 5
           $delaySeconds = 30
           $repoUrl = 'https://github.com/adavak/Win_ISO_Patching_Scripts.git'
+
           for ($i = 1; $i -le $maxAttempts; $i++) {
             Write-Host "Cloning patch scripts (attempt $i/$maxAttempts)..."
+
             if (Test-Path patcherScripts) { Remove-Item patcherScripts -Recurse -Force }
+
             & git clone --depth 1 $repoUrl patcherScripts
             if ($LASTEXITCODE -eq 0) {
               Write-Host "Clone succeeded"
               break
             }
+
             Write-Host "git clone failed with exit code $LASTEXITCODE"
             if ($i -lt $maxAttempts) {
               Write-Host "Retrying in $delaySeconds seconds..."
@@ -40,27 +44,28 @@ jobs:
               throw "git clone failed after $maxAttempts attempts"
             }
           }
+
       - name: Step-2 Download from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          gh release download win10-22h2-amd64 --repo vaesn/win-iso-archive --pattern "*d4e92df7.7z.*" --dir ./
+          gh release download win11-ltsc2024-x64 --repo vaesn/win-iso-archive --pattern "*cff9cd2d.7z.*" --dir ./
           7z x *.7z.001 -y
           Start-Sleep -Seconds 3
-          Rename-Item -Path "*d4e92df7.iso" -NewName "win10biz22h2amd64.iso"
+          Rename-Item -Path "*cff9cd2d.iso" -NewName "win11ltsc2024x64.iso"
           Remove-Item -Path "*.7z.*" -Force
           New-Item -ItemType Directory -Force -Path "assets"
           Move-Item -Path "../W10UI.ini" -Destination "./W10UI.ini" -Force
-          Remove-Item -Path "../Drivers/ALL/w11" -Recurse -Force
+          Remove-Item -Path "../Drivers/ALL/w10" -Recurse -Force
           Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
 
       - name: Step-3 Update By Win_ISO_Patching_Scripts
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd" 2>&1 | Tee-Object -FilePath "./update-win10-22h2-amd64.log" -Encoding utf8
+          & cmd /c "(echo 9 & echo 9 & echo 9) | Start.cmd" 2>&1 | Tee-Object -FilePath "./update-win11-ltsc2024-x64.log" -Encoding utf8
           if ($LASTEXITCODE -ne 0) { throw "Start.cmd failed with exit code $LASTEXITCODE" }
 
       - name: Step-4 Split Archive
@@ -68,14 +73,14 @@ jobs:
         working-directory: .
         run: |
           $SourceDir    = "./patcherScripts/assets"
-          $DistDir      = "dist_win10biz22h2amd64"
-          $RevisionName = "win10-22h2-amd64"
-          $MaxVolMB     = 1895
+          $DistDir      = "dist_win11ltsc2024x64"
+          $RevisionName = "win11-ltsc2024-x64"
+          $MaxVolMB     = 1985
           $Reserve      = 16
           $MaxDiffMB    = 128
 
           New-Item -Path $DistDir -ItemType Directory -Force | Out-Null
-          Remove-Item -Path "./patcherScripts/win10biz22h2amd64.iso" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "./patcherScripts/win11ltsc2024x64.iso" -Force -ErrorAction SilentlyContinue
           $Iso = Get-ChildItem -Path $SourceDir -Filter "*.iso" -File | Select-Object -First 1
 
           $BaseName  = $Iso.BaseName
@@ -143,11 +148,11 @@ jobs:
           Get-ChildItem -Recurse -File -Force | Where-Object { $_.FullName -notmatch '\\(Drivers|\.git|\.github)(\\|$)' }
           Write-Host "Split Archive Done..." -ForegroundColor Green
 
-          Get-ChildItem "./dist_win10biz22h2amd64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+          Get-ChildItem "./dist_win11ltsc2024x64" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
             Write-Host ("  {0}  {1:N2} MB" -f $_.Name, ($_.Length / 1MB))
           }
 
-          $vols = Get-ChildItem "./dist_win10biz22h2amd64/*.7z.*"
+          $vols = Get-ChildItem "./dist_win11ltsc2024x64/*.7z.*"
           $max = ($vols | Measure-Object Length -Maximum).Maximum / 1MB
           $min = ($vols | Measure-Object Length -Minimum).Minimum / 1MB
           Write-Host ("最大卷: {0:N2} MB" -f $max)
@@ -232,13 +237,13 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: true
           body: |
-            ## windows10 22h2 amd64 update zh_CN ${{ env.ISO_REVISION }}
+            ## windows11 ltsc 2024 x64 zh_CN update ${{ env.ISO_REVISION }}
             - **ARTIFACT**: ${{ env.ISO_NAME }}
             - **SHA256**: ${{ env.SHA256 }}
             - **File Size**: ${{ env.ISO_SIZEMB }} ， ${{ env.ISO_SIZEGB }}
             - **Volume Size**: ${{ env.VOLUME_SIZE }}
             - **Volume Count**: ${{ env.PART_COUNT }}
-            - **ORIGINAL**: zh-cn_windows_10_business_editions_version_22h2_updated_oct_2025_x64_dvd_d4e92df7.iso
+            - **ORIGINAL**: zh-cn_windows_11_enterprise_ltsc_2024_x64_dvd_cff9cd2d.iso
             ---
             ### 📦 下载说明
             使用 7-Zip 进行分卷压缩，每卷 ${{ env.VOLUME_SIZE }}，共 ${{ env.PART_COUNT }} 卷。
@@ -257,7 +262,7 @@ jobs:
           tag_name: ${{ env.REVISION_NAME }}
           name: ${{ env.REVISION_NAME }}-${{ env.ISO_REVISION }}
           files: |
-            ./dist_win10biz22h2amd64/*.7z.*
+            ./dist_win11ltsc2024x64/*.7z.*
             ./patcherScripts/*.log
 
       - name: Step-8 Update README
@@ -273,10 +278,10 @@ jobs:
               git fetch origin main
               git reset --hard origin/main
               $readmeOriginal = Get-Content README.md -Raw -Encoding utf8
-              $replacement = "<!-- win10-22h2-amd64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /win10-22h2-amd64 -->"
+              $replacement = "<!-- win11-ltsc2024-x64 -->`n$fileName ($newTimeNOW UTC)`n<!-- /win11-ltsc2024-x64 -->"
               $readmeUpdated = [regex]::Replace(
                   $readmeOriginal,
-                  '(?s)(<!-- win10-22h2-amd64 -->).*?(<!-- /win10-22h2-amd64 -->)',
+                  '(?s)(<!-- win11-ltsc2024-x64 -->).*?(<!-- /win11-ltsc2024-x64 -->)',
                   { $replacement }
               )
               if ($readmeUpdated -eq $readmeOriginal) { break }

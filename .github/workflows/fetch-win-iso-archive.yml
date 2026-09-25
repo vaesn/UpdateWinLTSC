@@ -1,5 +1,5 @@
 # =============================================================================
-# 工作流名称：fetch-win-iso-amd64
+# 工作流名称：fetch-win-iso-x64
 # -----------------------------------------------------------------------------
 # 功能：在仓库 A 上手动触发，下载 Windows ISO，按大小自动决定"直传 or 分卷"，
 #       然后把产物上传到仓库 B 的 Release（B 是纯存档仓库）。
@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release Tag (e.g., win10-22h2-amd64)"
+        description: "Release Tag (e.g., win10-22h2-x64)"
         required: true
         type: string
       iso_url:
