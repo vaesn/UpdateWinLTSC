@@ -1,6 +1,17 @@
 name: update-win10-ltsb2016-amd64
 on:
   workflow_dispatch:
+    inputs:
+      delete_old_release:
+        description: "Delete existing Release with same tag before upload (uncheck to APPEND to it)"
+        required: false
+        type: boolean
+        default: false
+      delete_old_runs:
+        description: "Delete past completed runs of this workflow (keep Actions page clean)"
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: "0 12 18 * *"
 permissions:
@@ -226,7 +237,7 @@ jobs:
           Write-Host "========================================" -ForegroundColor Cyan
 
       - name: Step-5 Delete Old Release
-        if: ${{ always() }}
+        if: ${{ github.event.inputs.delete_old_release == 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -234,7 +245,7 @@ jobs:
         run: gh release delete "${{ env.REVISION_NAME }}" --cleanup-tag -y || true
 
       - name: Step-6 Delete past completed runs of this workflow
-        if: ${{ always() }}
+        if: ${{ github.event.inputs.delete_old_runs == 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
