@@ -52,16 +52,16 @@ jobs:
         shell: pwsh
         working-directory: ./patcherScripts
         run: |
-          #gh release download win10-ltsb2016-amd64 --repo vaesn/win-iso-archive --pattern "*9060409.7z.*" --dir ./
-          #7z x *9060409.7z.001 -y
-          #Start-Sleep -Seconds 3
-          #Rename-Item -Path "*9060409.iso" -NewName "win10ltsb2016amd64.iso"
-          #Remove-Item -Path "*9060409.7z.*" -Force
+          gh release download win10-ltsb2016-amd64 --repo vaesn/win-iso-archive --pattern "*9060409.7z.*" --dir ./
+          7z x *9060409.7z.001 -y
+          Start-Sleep -Seconds 3
+          Rename-Item -Path "*9060409.iso" -NewName "win10ltsb2016amd64.iso"
+          Remove-Item -Path "*9060409.7z.*" -Force
+
           # https://ntriver.org/drive?cn_windows_10_enterprise_2016_ltsb_x64_dvd_9060409.iso
 
           <#
           $isoUrl = ""
-
           aria2c.exe `
             --dir=. `
             --out=win10ltsb2016amd64.iso `
