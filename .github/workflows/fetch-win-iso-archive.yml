@@ -233,7 +233,7 @@ jobs:
             --split=4 \
             --max-connection-per-server=4 \
             --min-split-size=4M \
-            --max-overall-download-limit=2M
+            --max-overall-download-limit=2M \
             --file-allocation=none \
             --continue=true \
             --max-tries=20 \
@@ -246,9 +246,9 @@ jobs:
             --async-dns=true \
             --enable-http-pipelining=true \
             --content-disposition=true \
-            --max-file-not-found=10
-            --lowest-speed-limit=10K
-            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36"
+            --max-file-not-found=10 \
+            --lowest-speed-limit=10K \
+            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36" \
             "$ISO_URL"
 
           # 打印 ./original 下的文件，便于排查 aria2c 实际命名了什么
