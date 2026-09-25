@@ -35,6 +35,16 @@ on:
         description: "ISO Download URL"
         required: true
         type: string
+      delete_old_release:
+        description: "Delete existing Release with same tag before upload (uncheck to APPEND to it)"
+        required: true
+        type: boolean
+        default: false
+      delete_old_runs:
+        description: "Delete past completed runs of this workflow (keep Actions page clean)"
+        required: true
+        type: boolean
+        default: false
 
 # =============================================================================
 # 权限声明
@@ -580,6 +590,7 @@ jobs:
       # continue-on-error: true 让本步骤失败也不影响后续步骤
       # ======================================================================
       - name: Step-3 Delete Old Release on target repo
+        if: ${{ github.event.inputs.delete_old_release == 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.B_REPO_TOKEN }}
@@ -599,6 +610,7 @@ jobs:
       # 只操作仓库 A 自己的 run，用默认 GITHUB_TOKEN 即可。
       # ======================================================================
       - name: Step-4 Delete past completed runs of this workflow
+        if: ${{ github.event.inputs.delete_old_runs == 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -631,8 +643,7 @@ jobs:
             --workflow "$WORKFLOW_FILE" \
             --limit 100 \
             --json databaseId,status \
-            --jq '.[] | select(.status=="completed") | .databaseId' \
-          | while read -r run_id; do
+            --jq '.[] | select(.status=="completed") | .databaseId' | while read -r run_id; do
               # 空行跳过（安全防护）
               [[ -z "$run_id" ]] && continue
               # 跳过当前 run（不能删自己）
