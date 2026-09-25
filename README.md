@@ -36,7 +36,7 @@
 - **_Windows 10 LTSB 2016 amd64_**
 
 <!-- win10-ltsb2016-amd64 -->
-NULL
+14393.9514.260912-1548.RS1_RELEASE_INMARKET_CLIENT_X64FRE_ZH-CN_f5bd66ae.iso (2026-09-25 06:37:00 UTC)
 <!-- /win10-ltsb2016-amd64 -->
 
 <br />
