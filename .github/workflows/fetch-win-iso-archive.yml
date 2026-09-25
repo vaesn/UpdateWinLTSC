@@ -266,7 +266,7 @@ jobs:
           # Reserve ：每卷预留余量（MiB），吸收 7z 头部开销
           # ASSETS  ：最终上传目录
           MaxVolMB=1895
-          Reserve=16
+          Reserve=8
           ASSETS="./assets"
 
           # mapfile -t 数组名 < <(命令) 语法拆解：
