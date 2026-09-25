@@ -2,7 +2,7 @@ name: update-win10-ltsc2019-amd64
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 14 18 * *"
+    - cron: "37 14 18 * *"
 permissions:
   contents: write
   actions: write
